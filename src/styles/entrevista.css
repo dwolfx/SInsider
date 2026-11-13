@@ -1,0 +1,362 @@
+/**
+ * Saúde Insider — variante Entrevista da matéria (frame 127:6221).
+ *
+ * Carrega SOBRE o single.css quando o post tem o formato "entrevista"
+ * (dependência declarada no enqueue: components → single → entrevista), e
+ * as regras vivem sob .si-article--entrevista, classe que o post_class
+ * ganha em inc/entrevista.php.
+ *
+ * Duas diferenças estruturais sobre a matéria padrão:
+ *   1. Abertura com foto RETRATO 2:3 à esquerda e cabeçalho editorial à
+ *      direita (nós 127:6284–127:6317), título no corpo de manchete.
+ *   2. Corpo em pingue-pongue: pergunta = h3, resposta = parágrafos
+ *      (convenção do editor, decisão D9). Os marcadores P./R. são ::before
+ *      do tema — interface do formato, nunca digitados pelo editor.
+ *
+ * Trilho, capitular, caixa Recomendadas e anúncio no corpo são os do
+ * single.css, sem override — a variante só muda o que o frame muda.
+ *
+ * Mobile-first; breakpoints literais (768): custom properties não
+ * funcionam dentro de @media.
+ */
+
+/* =====================================================================
+ * 1. ABERTURA (foto retrato + cabeçalho editorial)
+ * ===================================================================== */
+
+/*
+ * O título volta ao corpo de manchete: o frame usa 48/50,4 com tracking
+ * -0,96px (nó 127:6293) — exatamente os tokens de h1. O peso 700 de lá é o
+ * artefato Georgia registrado; vale o 900 do token.
+ */
+.si-article--entrevista .si-article__titulo {
+	font-size: var(--si-font-size-h1);
+	font-weight: var(--si-font-weight-h1);
+	line-height: var(--si-line-height-h1);
+	letter-spacing: var(--si-letter-spacing-h1);
+}
+
+/*
+ * Retrato 2:3 do frame (392x588), no lugar do 3:2 da matéria padrão. No
+ * mobile o teto de 70vh evita que a foto engula a dobra inteira; quando o
+ * teto corta, o object-fit herdado do componente mantém o enquadramento.
+ */
+.si-entrevista__img {
+	aspect-ratio: 2 / 3;
+	max-height: 70vh;
+}
+
+/*
+ * Chapéu, título, linha fina e metadados na ordem do DOM — que é a ordem
+ * de empilhamento no mobile decidida na spec (a foto vem DEPOIS do meta).
+ */
+.si-entrevista__intro {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-6);
+}
+
+/* Título e linha fina, com o vão de 24 do frame entre eles (nó 127:6291). */
+.si-entrevista__miolo {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-6);
+}
+
+@media (min-width: 768px) {
+	/*
+	 * Linha do frame (nó 127:6284): foto de 392px + vão de 24 + coluna de
+	 * texto. A figura vem depois no DOM (ordem do mobile) e o grid a
+	 * devolve à esquerda. O modificador só existe com imagem destacada —
+	 * sem foto, o cabeçalho segue em coluna única, sem célula vazia.
+	 */
+	.si-entrevista__header--com-foto {
+		display: grid;
+		grid-template-columns: 392px minmax(0, 1fr);
+		/*
+		 * ⚠️ Vão só entre COLUNAS. Com o retrato o grid ganha uma 2ª linha,
+		 * só da legenda (ver abaixo), e o respiro foto → legenda é a margem de
+		 * 4px que a legenda já traz do single.css, a mesma da matéria padrão.
+		 * Nas demais aberturas o grid tem uma linha só e o vão entre linhas
+		 * não age.
+		 */
+		gap: 0 var(--si-space-6);
+	}
+
+	.si-entrevista__header--com-foto .si-entrevista__intro {
+		grid-row: 1;
+		grid-column: 2;
+	}
+
+	.si-entrevista__img {
+		max-height: none;
+	}
+
+	/*
+	 * A foto termina onde a coluna de texto termina — `T-24`, 21/09/2026.
+	 *
+	 * Na referência do cliente a foto corre até a linha da data; até aqui ela
+	 * parava na altura do 2:3 do frame (392x588) e sobravam ~50px de coluna
+	 * abaixo dela. O 2:3 vira PISO: com texto curto a foto mantém o
+	 * enquadramento do frame, e com texto longo estica.
+	 *
+	 * ⚠️ O `object-fit: cover` do `.si-article__img` é o que segura o
+	 * enquadramento quando ela estica — sem ele a foto deformaria. Por isso o
+	 * `aspect-ratio` é anulado aqui em vez de ganhar outro valor: é a altura
+	 * da linha do grid que manda, e a proporção deixa de ser fixa.
+	 *
+	 * ⚠️ A data alinha com o pé da FOTO, não com o da legenda — `T-25` da
+	 * lista de 28/09/2026: "quando adiciona o crédito da foto, ele desalinha
+	 * o autor e data com a foto". Até então a figura inteira (foto + legenda)
+	 * era uma coluna flex esticada na linha do grid, e a legenda tirava a
+	 * própria altura do pé da foto: com uma linha de legenda a foto acabava
+	 * 22px ACIMA da data, e quem se alinhava com a data era a legenda. De
+	 * quebra o piso 2:3 valia para a figura, não para a foto (392x566).
+	 *
+	 * Agora a figura ocupa DUAS linhas do cabeçalho e as herda por subgrid: a
+	 * foto fica na 1ª, a mesma da coluna de texto, e a legenda na 2ª, que só
+	 * ela ocupa. A legenda pendura abaixo da foto e empurra o corpo da
+	 * matéria em vez de sobrepô-lo; sem legenda, a 2ª linha tem altura zero.
+	 *
+	 * ⚠️ Navegador sem `subgrid` (anterior a Chrome 117, Safari 16 e Firefox
+	 * 71) descarta o `grid-template-rows` e a figura volta a empilhar foto e
+	 * legenda por conta própria: a data pode desalinhar de novo, mas nada se
+	 * sobrepõe — tudo continua no fluxo.
+	 */
+	.si-entrevista__header--com-foto .si-entrevista__figure {
+		grid-row: 1 / span 2;
+		grid-column: 1;
+		display: grid;
+		grid-template-rows: subgrid;
+	}
+
+	/*
+	 * ⚠️ O invólucro é quem ocupa a 1ª linha, não a `<img>`: bloco comum
+	 * estica na linha do grid e não entra no cálculo dela com a altura
+	 * natural do arquivo. A foto vai posicionada por cima e cobre o
+	 * invólucro inteiro. O piso 2:3 fica nele.
+	 */
+	.si-entrevista__header--com-foto .si-entrevista__foto {
+		position: relative;
+		min-height: calc(392px * 3 / 2);
+	}
+
+	.si-entrevista__header--com-foto .si-entrevista__img {
+		position: absolute;
+		inset: 0;
+		height: 100%;
+		aspect-ratio: auto;
+	}
+
+	/*
+	 * Quando a coluna estica junto com a foto, a sobra de altura se divide
+	 * em partes iguais acima e abaixo do miolo, como o frame distribui
+	 * (49,5px de cada lado no nó 127:6291) — e o MetaBar cola no pé da
+	 * coluna, alinhado à base da foto (nó 127:6296).
+	 */
+	.si-entrevista__miolo {
+		margin-block: auto;
+	}
+
+	/*
+	 * ⚠️ O respiro de 28px SAIU debaixo do MetaBar e virou margem do
+	 * cabeçalho — `T-24`, 21/09/2026, a pedido do cliente: "a data tem que
+	 * estar alinhada ao pé da foto".
+	 *
+	 * Embaixo do MetaBar ele empurrava a data 28px acima da base da coluna, e
+	 * a coluna é o que a foto acompanha. Movido para fora, a última linha da
+	 * assinatura encosta no pé da figura e a distância até a abertura do texto
+	 * continua a mesma: 28 + 24 = 52px, os mesmos do frame. Por isso o
+	 * cabeçalho da entrevista não usa os 48px da matéria padrão.
+	 */
+	.si-entrevista__header .si-article__meta {
+		padding-bottom: 0;
+	}
+
+	.si-entrevista__header {
+		margin-bottom: calc(var(--si-space-7) + var(--si-space-6));
+	}
+
+}
+
+/* ---------------------------------------------------------------------
+ * 1.1 Assinatura empilhada (`T-24`, 21/09/2026)
+ * -------------------------------------------------------------------
+ * O cliente mandou a abertura com a assinatura em duas linhas rotuladas e
+ * a data no pé com as ações à direita:
+ *
+ *     TEXTO: PAULA CRISTINA
+ *     FOTO: ANDRE LESSA
+ *     10 AGOSTO 2026        [compartilhar] [salvar] [ouvir]
+ *
+ * ⚠️ Substitui a linha única de data + autor + ações que vinha do frame
+ * (nó 127:6297). O frame continua valendo para a matéria padrão e para a
+ * Cúpula — só a Entrevista muda.
+ *
+ * ⚠️ SEM FIO acima de "TEXTO:" desde o `T-25`, lista de 28/09/2026:
+ * "remover o fio entre a linha fina e o autor do texto". Saíram juntos o
+ * fio e os 24px de respiro que o afastavam da assinatura — sem a linha, eles
+ * virariam um vão de 48px sem motivo aparente. Entre linha fina e
+ * assinatura fica o `gap` de 24px da própria coluna, o mesmo de chapéu →
+ * título e de título → linha fina, e o mesmo com que a MetaBar da matéria
+ * padrão segue a foto, também sem fio. Quem separa a assinatura do texto
+ * agora é a proximidade: 4px entre as linhas dela, 24 até a linha fina.
+ *
+ * A tipografia de rótulo (caixa alta, tracking, corpo) continua vindo de
+ * `.si-article__meta`, no single.css: aqui só se decide o arranjo.
+ */
+
+.si-entrevista__meta {
+	/*
+	 * ⚠️ Anula as DUAS formas que o single.css dá ao MetaBar: o flex de
+	 * qualquer largura e o grid de três células iguais que entra em 768px.
+	 * Aqui as linhas empilham em toda largura, e sem isto a assinatura sai
+	 * lado a lado no mobile — "TEXTO: … FOTO: …" numa linha só.
+	 *
+	 * Vale sem media query porque este arquivo carrega DEPOIS do single.css
+	 * e as duas regras têm a mesma especificidade.
+	 */
+	display: block;
+}
+
+.si-entrevista__assinatura {
+	margin: 0 0 var(--si-space-1);
+	/*
+	 * ⚠️ Mais escura e mais pesada que o resto da linha de metadados, como na
+	 * referência: quem assina ganha o contraste do texto principal, e a data
+	 * fica no cinza terciário que o single.css já lhe dá.
+	 */
+	color: var(--si-color-text-primary);
+	font-weight: var(--si-font-weight-bold);
+}
+
+.si-entrevista__assinatura a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.si-entrevista__assinatura a:hover,
+.si-entrevista__assinatura a:focus-visible {
+	color: var(--si-color-text-link);
+	text-decoration: underline;
+}
+
+/*
+ * Data e ações na mesma linha, extremos opostos. Envolve as células que o
+ * single.css já estiliza, então nada aqui repete cor ou corpo.
+ */
+.si-entrevista__meta-pe {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--si-space-3) var(--si-space-6);
+	/*
+	 * ⚠️ Margem NEGATIVA nas duas pontas, e não é gambiarra: os botões de
+	 * ação são caixas de 36px (`.si-article__acao`, no single.css) dentro de
+	 * uma linha cujo texto ocupa 16,5px — 11px × 1.5. Com `align-items:
+	 * center`, sobram ~10px ACIMA e ~10px ABAIXO da data que não são
+	 * espaçamento nenhum: são a altura do botão.
+	 *
+	 * Os de cima abriam o vão FOTO → data muito além do vão entre as duas
+	 * linhas acima; os de baixo impediam a data de encostar no pé da foto.
+	 * O cliente apontou as duas coisas em 21/09/2026.
+	 *
+	 * Encolher o botão resolveria também, e seria pior: 36px já está abaixo
+	 * dos 44 que a regra de alvo de toque pede. A margem tira a inflação do
+	 * fluxo sem tocar na área clicável, e o que ela invade é respiro — não há
+	 * texto nem acima nem abaixo.
+	 *
+	 * A conta sai dos tokens para não virar número mágico; o 36px é o único
+	 * valor repetido daqui, e vem da caixa do botão.
+	 */
+	--si-entrevista-acao: 36px;
+
+	margin-block: calc(
+		(var(--si-entrevista-acao) - var(--si-font-size-label) * var(--si-line-height-label)) / -2
+	);
+}
+
+.si-entrevista__meta-pe .si-article__meta-cell--acoes {
+	margin-left: auto;
+}
+
+/* =====================================================================
+ * 2. CORPO EM PINGUE-PONGUE (P./R.)
+ * =====================================================================
+ * Convenção do editor: pergunta = Heading 3, resposta = parágrafos comuns
+ * (block pattern "Pergunta e resposta", inc/entrevista.php). O tema desenha
+ * recuo e marcadores. Um post marcado como entrevista sem nenhum h3
+ * renderiza como matéria comum — as regras só agem sobre h3 e o que vem
+ * depois dele.
+ */
+
+/*
+ * Recuo do par: célula do marcador (24) + vão (12) medidos no frame (nós
+ * 202:1855/202:1858); 32px no mobile, decisão da spec. O ~ alcança TODOS os
+ * parágrafos depois da primeira pergunta — resposta com vários parágrafos
+ * herda o recuo — sem tocar nos parágrafos de abertura.
+ */
+.si-article--entrevista .si-article__content > h3,
+.si-article--entrevista .si-article__content > h3 ~ p {
+	position: relative;
+	padding-left: var(--si-space-8);
+}
+
+@media (min-width: 768px) {
+	.si-article--entrevista .si-article__content > h3,
+	.si-article--entrevista .si-article__content > h3 ~ p {
+		/* 36px do frame = 24 da célula + 12 do vão. */
+		padding-left: calc(var(--si-space-6) + var(--si-space-3));
+	}
+}
+
+/*
+ * A pergunta abandona a tipografia de heading: o frame a desenha no corpo
+ * do texto, só que em negrito (16/25,6 — nó 202:1859). Valem os tokens body
+ * pela política registrada de 03/08; o Georgia do frame é a variável de
+ * fonte desatualizada.
+ */
+.si-article--entrevista .si-article__content > h3 {
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-body);
+	font-weight: var(--si-font-weight-bold);
+	line-height: var(--si-line-height-body);
+	letter-spacing: var(--si-letter-spacing-body);
+}
+
+/* 8px entre pergunta e resposta do MESMO par (nó 202:1868); os 24 entre
+ * pares vêm do respiro padrão do corpo (single.css). */
+.si-article--entrevista .si-article__content > h3 + p {
+	margin-top: var(--si-space-2);
+}
+
+/*
+ * Marcadores. São interface do formato (exceção registrada à regra de
+ * ouro): o editor nunca digita "P."/"R." — e leitores de tela anunciam o
+ * content dos ::before, o que aqui até ajuda. Só o PRIMEIRO parágrafo
+ * depois do h3 ganha o "R."; os demais parágrafos da resposta seguem só
+ * com o recuo. A inconsistência interna do frame (1º par com rótulos de
+ * 11px, demais de 13px) foi unificada nos tokens label, decisão da spec.
+ */
+.si-article--entrevista .si-article__content > h3::before,
+.si-article--entrevista .si-article__content > h3 + p::before {
+	content: "P.";
+	position: absolute;
+	left: 0;
+	/* Centra o rótulo (16,5px de linha) na primeira linha do corpo (29,75px). */
+	top: calc((var(--si-line-height-body) * var(--si-font-size-body) - var(--si-line-height-label) * var(--si-font-size-label)) / 2);
+	width: var(--si-space-6);
+	color: var(--si-color-brand-primary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-align: center;
+	text-transform: var(--si-text-transform-label);
+}
+
+.si-article--entrevista .si-article__content > h3 + p::before {
+	content: "R.";
+	color: var(--si-color-text-tertiary);
+}

@@ -1,0 +1,255 @@
+/**
+ * Saúde Insider — faixa de publicidade.
+ *
+ * Componente, não área do site: o mesmo slot aparece na home e vai reaparecer
+ * nas páginas de matéria e de editoria. Por isso vive em arquivo próprio, e
+ * não dentro de home.css.
+ *
+ * Breakpoints repetidos literalmente (480, 768, 1024, 1280): custom properties
+ * não funcionam dentro de @media.
+ */
+
+/* =====================================================================
+ * 1. ESTRUTURA
+ * ===================================================================== */
+
+.si-ad__inner {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-6);
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding: var(--si-space-6) var(--si-container-gutter);
+}
+
+/*
+ * Fio que fecha a faixa. Entra como último item do flex, e não como borda do
+ * bloco, para acompanhar a largura do conteúdo em vez de atravessar a tela —
+ * no Figma ele mede 1136px dentro do container de 1200. O gap de 24px do
+ * flex reproduz o respiro que o layout tem antes dele.
+ */
+.si-ad__inner::after {
+	content: "";
+	height: 1px;
+	background-color: var(--si-color-border-default);
+}
+
+/* =====================================================================
+ * 2. RÓTULO
+ * =====================================================================
+ * Texto centralizado com um fio de cada lado, ocupando o espaço restante.
+ * Os fios são pseudo-elementos porque são decoração, não conteúdo.
+ */
+
+.si-ad__rotulo {
+	display: flex;
+	align-items: center;
+	gap: var(--si-space-3);
+}
+
+.si-ad__rotulo::before,
+.si-ad__rotulo::after {
+	content: "";
+	flex: 1;
+	height: 1px;
+	background-color: var(--si-color-border-default);
+}
+
+.si-ad__rotulo-texto {
+	color: var(--si-color-text-tertiary);
+	font-family: var(--si-font-sans);
+	/* 8,8px, o corpo medido no Figma. Ver --si-font-size-label-xs. */
+	font-size: var(--si-font-size-label-xs);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+	white-space: nowrap;
+}
+
+/* =====================================================================
+ * 3. MOLDURA E CRIATIVO
+ * ===================================================================== */
+
+.si-ad__quadro {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding-block: var(--si-space-3);
+	background-color: var(--si-color-surface-subtle);
+}
+
+/*
+ * A proporção é reservada aqui, antes de qualquer coisa carregar — é o que
+ * impede o conteúdo abaixo de pular quando o anúncio entra. O tamanho vem do
+ * formato declarado no slot, nunca de style inline.
+ */
+.si-ad__criativo {
+	width: 100%;
+	max-width: var(--si-ad-largura);
+	aspect-ratio: var(--si-ad-proporcao);
+}
+
+/* Billboard IAB — 970x250, o formato do FullBanner no Figma. */
+.si-ad--billboard {
+	--si-ad-largura: 970px;
+	--si-ad-proporcao: 970 / 250;
+}
+
+/* Quadrado — 250x250, o formato ao lado da citação. */
+.si-ad--square {
+	--si-ad-largura: 250px;
+	--si-ad-proporcao: 1 / 1;
+}
+
+/* Módulo — 200x200, o quadrado da faixa do pé da home. */
+.si-ad--skyscraper {
+	/* Rail lateral da Cúpula (160x600). */
+	--si-ad-largura: 160px;
+	--si-ad-proporcao: 160 / 600;
+}
+
+.si-ad--tile {
+	--si-ad-largura: 200px;
+	--si-ad-proporcao: 1 / 1;
+}
+
+.si-ad__criativo :is(img, iframe, ins, div) {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.si-ad__img {
+	object-fit: contain;
+}
+
+.si-ad__link {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+/* =====================================================================
+ * 4. RESPONSIVO
+ * =====================================================================
+ * O criativo encolhe mantendo a proporção. Um billboard de 970x250 fica muito
+ * baixo em tela pequena — a solução de verdade é servir outro formato no
+ * mobile, o que cabe ao ad server decidir quando ele existir.
+ */
+
+@media (min-width: 768px) {
+	.si-ad__inner {
+		padding-inline: var(--si-space-8);
+	}
+}
+
+@media (min-width: 1280px) {
+	.si-ad__quadro {
+		/* Respiro do Figma entre a moldura e o criativo. */
+		padding-block: var(--si-space-3);
+	}
+}
+
+
+/* =====================================================================
+ * 5. FAIXA DE QUADRADOS AGRUPADOS
+ * =====================================================================
+ * Pé da home: um quadrado de apoio institucional e quatro de publicidade,
+ * cada grupo com seu rótulo mas na mesma régua de cinco módulos de 200px.
+ *
+ * Empilhado por padrão. A régua de cinco só entra a partir de 1024px, onde
+ * cabe sem o quadrado ficar pequeno demais para o criativo.
+ */
+
+.si-ad-strip__inner {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-6);
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding: var(--si-space-6) var(--si-container-gutter);
+}
+
+/* Mesmo fio de fechamento da faixa simples, pelo mesmo motivo. */
+.si-ad-strip__inner::after {
+	content: "";
+	height: 1px;
+	background-color: var(--si-color-border-default);
+}
+
+.si-ad-strip__grupos {
+	display: grid;
+	gap: var(--si-space-8);
+}
+
+.si-ad-strip__grupo {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-6);
+}
+
+/*
+ * Os quadrados centralizam o criativo, que trava na largura do formato. Sem
+ * moldura cinza: no frame o quadrado é o próprio criativo, ao contrário da
+ * faixa de billboard.
+ */
+.si-ad-strip__quadros {
+	display: grid;
+	gap: var(--si-space-8);
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	justify-items: center;
+}
+
+.si-ad-strip__quadro {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+}
+
+/*
+ * Mesmo recuo lateral da faixa simples: no frame são 8px do FullBanner mais
+ * 24px do container interno. É o que faz a régua fechar em 1136px.
+ */
+@media (min-width: 768px) {
+	.si-ad-strip__inner {
+		padding-inline: var(--si-space-8);
+	}
+}
+
+@media (min-width: 1024px) {
+	/*
+	 * Régua de cinco módulos: o grupo ocupa tantas colunas quantos slots
+	 * declara. O vão entre grupos é o mesmo de dentro do grupo, então os cinco
+	 * quadrados ficam equidistantes como no frame.
+	 */
+	.si-ad-strip__grupos {
+		grid-template-columns: repeat(5, 1fr);
+		column-gap: var(--si-space-8);
+	}
+
+	.si-ad-strip__grupo--1 { grid-column: span 1; }
+	.si-ad-strip__grupo--2 { grid-column: span 2; }
+	.si-ad-strip__grupo--3 { grid-column: span 3; }
+	.si-ad-strip__grupo--4 { grid-column: span 4; }
+	.si-ad-strip__grupo--5 { grid-column: span 5; }
+
+	.si-ad-strip__quadros {
+		grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+	}
+}
+
+/*
+ * Slot sem criativo cadastrado.
+ *
+ * A moldura sai assim mesmo — pedido do cliente em 24/08/2026 — para o espaço
+ * já estar reservado quando o anúncio entrar. Sem isto, cadastrar um criativo
+ * empurrava para baixo tudo o que vinha depois.
+ *
+ * ⚠️ Não precisa de altura própria: o `.si-ad__quadro` já reserva o espaço por
+ * `aspect-ratio`, com a proporção de cada formato.
+ */
+.si-ad--vazio .si-ad__quadro,
+.si-ad-strip__quadro.si-ad--vazio {
+	background-color: var(--si-color-surface-subtle);
+}

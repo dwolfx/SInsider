@@ -1,0 +1,1763 @@
+/**
+ * Saúde Insider — matéria (frame 124:3271 e variantes).
+ *
+ * Notícia padrão. As variantes carregam CSS adicional próprio:
+ * cupula.css (banner de seção) e entrevista.css (pingue-pongue).
+ *
+ * Depende do components.css vir antes (ordem load-bearing, como o home.css):
+ * os overrides contextuais daqui — section-header em 18/22px, itens da
+ * recirculação com respiro 12/16, grade em 3 colunas — só vencem porque este
+ * arquivo carrega depois.
+ *
+ * Geometria de referência (desktop >=1280): container de 1200px com gutter
+ * de 24px => miolo de 1152px; coluna de leitura de 792px centrada => margens
+ * de 180px de cada lado. O frame usa 1208/1192 e margens de 208px — a
+ * diferença vem da divergência registrada do container (1200px) e vale para
+ * todos os deslocamentos "para fora da coluna" deste arquivo: trilho e
+ * capitular na margem esquerda, anúncio e caixa Recomendadas na direita.
+ *
+ * Mobile-first; breakpoints literais (480/768/1024/1280): custom properties
+ * não funcionam dentro de @media.
+ */
+
+/* =====================================================================
+ * 1. ESTRUTURA DA MATÉRIA
+ * ===================================================================== */
+
+.si-article__container {
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	/* 24px do wrapper; somados aos 24 do cabeçalho dão os 48 do frame. */
+	padding: var(--si-space-6) var(--si-container-gutter);
+}
+
+/*
+ * A coluna de leitura. É o contexto de posicionamento do trilho e da
+ * capitular — tudo que "pendura" na margem parte daqui.
+ */
+.si-article__flow {
+	position: relative;
+	max-width: 792px;
+	margin-inline: auto;
+}
+
+/* =====================================================================
+ * 2. CABEÇALHO DA MATÉRIA (ArticleHeader, nó 124:4036)
+ * ===================================================================== */
+
+.si-article__header {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-6);
+	padding-top: var(--si-space-6);
+	/* 24px de pB do cabeçalho + 24px de gap do container do frame. */
+	margin-bottom: var(--si-space-12);
+}
+
+.si-article__titulo {
+	max-width: 720px;
+	font-size: var(--si-font-size-h2);
+	font-weight: var(--si-font-weight-h2);
+	/*
+	 * 1.15 medido no frame (36,8px sobre 32, nó 124:4051); o token h2 traz
+	 * 1.2. Divergência registrada na spec — levar à daily se o 1.15 deve
+	 * virar o line-height global de h2.
+	 */
+	line-height: 1.15;
+	letter-spacing: var(--si-letter-spacing-h2);
+}
+
+/*
+ * Linha fina da matéria — L2-03 da lista 2 do cliente (18/08/2026):
+ * "Fonte serifada. Cor: Cinza mais claro 25%. Reduzir entrelinhas-altura.
+ * Reduzir entreletras-largura."
+ *
+ * ⚠️ AFASTA-SE DO FRAME DE PROPÓSITO, e nos quatro pontos. O nó 124:4053 traz
+ * Inter Regular 18/26,1 com tracking 0 e #3f3f3f — exatamente o que este bloco
+ * aplicava antes, ao pixel. Não é correção de divergência: é pedido do cliente
+ * sobrepondo um frame que batia. A regra vale (lista do cliente supera o Figma),
+ * mas o designer precisa saber; registrado em N-12, docs/revisao-visual.md.
+ *
+ * Os valores de "reduzir" são escolha nossa — o cliente não quantificou e o
+ * frame não dá alvo, porque o frame É o ponto de partida. Ficam literais e
+ * comentados, como o line-height de 1.15 do .si-article__titulo logo acima:
+ * é divergência de um elemento só, não padrão do sistema.
+ *
+ * ⚠️ Escopo: SÓ .si-article__linha-fina. O seletor serve as três variantes de
+ * matéria (notícia, entrevista e Cúpula), que é exatamente o que o pedido
+ * alcança. As outras duas linhas finas do portal NÃO foram tocadas:
+ *   - .si-hero__linha-fina (manchete da home) — compartilha corpo, peso e
+ *     entrelinha pelos tokens --si-*-subheadline, mas a COR dela já é outra
+ *     (--si-color-text-tertiary, #767676);
+ *   - .si-row__linha-fina (cards e listagens) — compartilha os mesmos tokens E
+ *     a cor --si-color-text-secondary.
+ * Por isso a mudança é escrita AQUI e não nos tokens: alterar
+ * --si-*-subheadline teria serifado e reduzido a entrelinha das três de uma vez,
+ * e alterar --si-color-text-secondary teria clareado as listagens junto.
+ * Conferido depois da mudança: home e Editoria seguem em Inter 18/26,1.
+ */
+.si-article__linha-fina {
+	max-width: 720px;
+	/* Mesma serifada dos títulos (Playfair Display). Antes herdava a sans do body. */
+	font-family: var(--si-font-serif);
+	color: var(--si-color-text-standfirst);
+	font-size: var(--si-font-size-subheadline);
+	font-weight: var(--si-font-weight-subheadline);
+	font-style: var(--si-font-style-subheadline);
+	/*
+	 * 1,45 -> 1,35: 26,1px de entrelinha viram 24,3.
+	 *
+	 * ⚠️ É escolha de densidade editorial, NÃO compensação de tipografia. Uma
+	 * versão anterior deste comentário dizia que a serifada tem olho maior que a
+	 * Inter e aguentaria a linha mais fechada — é o contrário. Medido nos woff2
+	 * que o tema serve: x-height de 0,5459 em na Inter contra 0,5140 em na
+	 * Playfair, ou seja, a serifada é 5,8% MENOR no mesmo corpo (9,83px contra
+	 * 9,25px em 18px). A troca de família já reduz o tamanho aparente, e o 1,35
+	 * aperta em cima disso. Se a legibilidade for reclamada, este é o primeiro
+	 * número a afrouxar.
+	 */
+	line-height: 1.35;
+	/*
+	 * 0 -> -0,01em (-0,18px em 18px). Metade do aperto do h1 (-0,02em), que é
+	 * display; aqui o texto ainda é para ler corrido.
+	 *
+	 * ⚠️ Junto com a troca de família, o texto encolhe 8,1% em largura (medido
+	 * na linha fina da notícia: 1275,5px em Inter contra 1172,4px aqui). Isso
+	 * MOVE O PONTO DE QUEBRA: a 720px cabia uma linha até ~83 caracteres e agora
+	 * cabe até ~90. Linha fina entre 84 e 90 caracteres passa de duas linhas
+	 * para uma, e aí o cabeçalho encurta 24,3px em vez de 3,6. O campo aceita
+	 * 220 caracteres — ver N-12.
+	 */
+	letter-spacing: -0.01em;
+}
+
+/*
+ * 3:2 do frame (792x528). Fixar a proporção elimina deslocamento de layout
+ * antes de a imagem (o LCP da página) carregar.
+ */
+.si-article__img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+	background-color: var(--si-color-surface-muted);
+}
+
+.si-article__legenda {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--si-space-1);
+	margin-top: var(--si-space-1);
+	color: var(--si-color-text-tertiary);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+/* Separador entre legenda e crédito — pontuação, não conteúdo. */
+.si-article__credito::before {
+	content: "—";
+	margin-right: var(--si-space-1);
+}
+
+/* ---------------------------------------------------------------------
+ * 2.1 Linha de metadados (MetaBar, nó 124:4061)
+ * ------------------------------------------------------------------- */
+
+.si-article__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--si-space-3) var(--si-space-6);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+}
+
+.si-article__meta-cell--data {
+	color: var(--si-color-text-tertiary);
+}
+
+/* O autor é o único elemento da linha em cor de texto principal (frame). */
+.si-article__meta-cell--autor a {
+	color: var(--si-color-text-primary);
+	text-decoration: none;
+}
+
+.si-article__meta-cell--autor a:hover {
+	color: var(--si-color-text-link);
+	text-decoration: underline;
+}
+
+.si-article__meta-cell--acoes {
+	display: flex;
+	align-items: center;
+	gap: var(--si-space-2);
+	/* Encosta à direita mesmo com a linha quebrada em telas estreitas. */
+	margin-left: auto;
+}
+
+/* Três células iguais do frame (248px cada): só quando a linha cabe. */
+@media (min-width: 768px) {
+	.si-article__meta {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--si-space-6);
+	}
+
+	.si-article__meta-cell--autor {
+		text-align: center;
+	}
+
+	.si-article__meta-cell--acoes {
+		justify-content: flex-end;
+		margin-left: 0;
+	}
+}
+
+/* ---------------------------------------------------------------------
+ * 2.2 Botões de ação (compartilhar, salvar, redes)
+ * ------------------------------------------------------------------- */
+
+.si-article__acao {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	border: 0;
+	background: none;
+	/* Ícones da MetaBar em #777777 no frame => token da divergência WCAG. */
+	color: var(--si-color-text-tertiary);
+	cursor: pointer;
+}
+
+/*
+ * Alvo de toque de 44x44 sem inflar o botão de 36px: mesmo truque do botão
+ * de áudio. Com gap de 8px entre botões, os alvos se tocam sem sobrepor.
+ */
+.si-article__acao::after {
+	content: "";
+	position: absolute;
+	inset: -4px;
+}
+
+.si-article__acao:hover {
+	color: var(--si-color-icon-active);
+}
+
+.si-article__acao .si-icon {
+	width: 15px;
+	height: 15px;
+}
+
+/* Feedback do "copiar link", ligado pelo JS de inc/single.php. */
+.si-acao--copiado {
+	color: var(--si-color-state-success);
+}
+
+/*
+ * O botão de áudio compartilhado (si_the_audio_button) chega com 18px e
+ * margin-left auto, feitos para a linha de metadados dos cards. Na matéria
+ * ele vive em células próprias: mesmo quadro de 36px e ícone de 15px dos
+ * botões vizinhos, cor da MetaBar do frame.
+ */
+.si-article__meta-cell--acoes .si-meta__audio,
+.si-article__rail .si-meta__audio {
+	width: 36px;
+	height: 36px;
+	margin-left: 0;
+	justify-content: center;
+	color: var(--si-color-text-tertiary);
+}
+
+.si-article__meta-cell--acoes .si-meta__audio .si-icon,
+.si-article__rail .si-meta__audio .si-icon {
+	width: 15px;
+	height: 15px;
+}
+
+/*
+ * O ::after do componente amplia 18px para 44 (inset -13). Sobre o quadro de
+ * 36px daqui isso viraria um alvo de 62px, invadindo os botões vizinhos —
+ * normaliza para os mesmos 44 dos demais.
+ */
+.si-article__meta-cell--acoes .si-meta__audio::after,
+.si-article__rail .si-meta__audio::after {
+	inset: -4px;
+}
+
+/* =====================================================================
+ * 3. TRILHO DE COMPARTILHAMENTO (nó 127:4499)
+ * =====================================================================
+ * Base (mobile/tablet): linha horizontal de botões entre a linha de
+ * metadados e o corpo. Em >=1280 vira coluna sticky na margem esquerda.
+ */
+
+.si-article__rail-inner {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--si-space-2);
+	margin-bottom: var(--si-space-6);
+}
+
+/* Ícones das redes um ponto menores (14px no frame) e mais escuros que os
+ * da MetaBar — os dois tons convivem no frame, de propósito. */
+.si-article__rail .si-article__acao {
+	color: var(--si-color-text-secondary);
+}
+
+.si-article__rail .si-article__acao--rede .si-icon {
+	width: 14px;
+	height: 14px;
+}
+
+/* Divisor entre as ações do post e as redes. Vertical na linha, horizontal
+ * na coluna. */
+.si-article__rail-divisor {
+	width: 1px;
+	height: var(--si-space-6);
+	background-color: var(--si-color-border-subtle);
+}
+
+/*
+ * ⚠️ O trilho em coluna entra em 1100px — pedido do cliente em 01/09/2026:
+ * abaixo de 1440 ele voltava a ser a linha horizontal, e "até 1100px ele
+ * poderia ficar ainda flutuando na esquerda".
+ *
+ * ⚠️ 1100 NÃO É UM DOS BREAKPOINTS DO PROJETO (480/768/1024/1280/1440). É
+ * exceção deliberada: o número saiu do cliente, não da escala.
+ *
+ * O trilho ficava em `left: -180px`, que é exatamente a margem da coluna, e
+ * -180 põe a borda ESQUERDA do trilho no mesmo x da borda esquerda do billboard
+ * que o corpo injeta — os 64px do trilho caíam INTEIROS sobre o anúncio, em toda
+ * largura (`L2-13`, 18/08/2026). Daí o -260: -180 da margem, -64 do trilho, -16
+ * de respiro.
+ *
+ * ⚠️ O QUE A CONTA ANTERIOR NÃO CONSIDEROU, e que é o que destrava o pedido:
+ * **abaixo de 1280 o anúncio não sangra.** A regra `margin-inline` da seção 4.2
+ * só vale de 1280 para cima; abaixo disso o billboard tem os mesmos 792px da
+ * coluna, e a margem esquerda inteira fica livre — 154px em 1100, 244px em 1279.
+ * Sobra folga de sobra para um trilho de 64. Medido em 01/09/2026.
+ *
+ * Por isso são dois regimes, e não um:
+ *
+ *   1100–1279  anúncio dentro da coluna  -> trilho a -80px (64 + 16 de respiro),
+ *                                           encostado na coluna
+ *   1280 e +   anúncio sangrando          -> ver o bloco de 1280 logo abaixo
+ */
+@media (min-width: 1100px) {
+	.si-article__body {
+		position: relative;
+	}
+
+	/*
+	 * Faixa da margem esquerda, da altura do corpo inteiro; dentro dela o
+	 * miolo é sticky e acompanha a rolagem. No frame o trilho só aparece na
+	 * retomada do corpo; com sticky ele parte do topo do corpo e desce junto —
+	 * a posição exata depende da rolagem de toda forma.
+	 */
+	.si-article__rail {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		/*
+		 * UMA posição para toda a faixa, e ela é contínua — sem degrau em
+		 * largura nenhuma. São dois regimes num `max()`:
+		 *
+		 *   -260px  16 à esquerda do anúncio sangrado (-180 da margem, -64 do
+		 *           trilho, -16 de respiro). Vence de 1344 para cima, e é
+		 *           EXATAMENTE o valor que já estava publicado.
+		 *   o calc  16px da borda da TELA. Vence abaixo de 1344, onde o -260
+		 *           jogaria o trilho para fora do viewport.
+		 *
+		 * Os dois se encontram em 1344 no mesmo pixel: a transição não tem
+		 * salto. Tabela de conferência no fim desta seção.
+		 */
+		left: max(-260px, calc(16px - (100vw - 792px) / 2));
+		width: 64px;
+	}
+
+	.si-article__rail-inner {
+		position: sticky;
+		/*
+		 * ⚠️ Desconta a barra fixa. Sem isto o trilho gruda a 24px do topo e
+		 * a barra, que ocupa de 0 a 98px no desktop, cobre 74px dele — foi o
+		 * que o cliente viu em 25/08/2026, depois de a barra passar a valer no
+		 * portal inteiro.
+		 *
+		 * A altura vem do `navigation.js`, que mede o cabeçalho e a publica em
+		 * `--si-header-fixo-altura`: ela muda com a largura da tela, e um
+		 * número aqui teria de ser repetido nos quatro degraus.
+		 *
+		 * A reserva vale 0 sem JavaScript e com a barra solta — nos dois casos
+		 * o cabeçalho rola junto e não há o que descontar.
+		 */
+		top: calc(var(--si-header-fixo-altura, 0px) + var(--si-space-6));
+		flex-direction: column;
+		align-items: center;
+		margin-bottom: 0;
+	}
+
+	.si-article__rail-divisor {
+		width: 40px;
+		height: 1px;
+	}
+}
+
+/*
+ * ⚠️ A CAPITULAR DISPUTA ESSA MESMA MARGEM, e foi o que a medição pegou.
+ *
+ * Ela é `position: absolute; right: 100%` sobre o primeiro parágrafo, com 1em
+ * de largura (96px) e 4px de margem: ocupa de `coluna − 100` a `coluna − 4`.
+ * Com o trilho a 16px da tela, a borda direita dele fica em 80, e abaixo de
+ * 1184 a capitular começa antes disso — os ícones cairiam em cima de um "C"
+ * vinho de 96px, logo na abertura da matéria.
+ *
+ * Passar o trilho para a esquerda dela não resolve: em 1100 a margem tem 154px,
+ * a capitular come 100, e sobram 54 para um trilho de 64. Não cabe, e nenhum
+ * ajuste de respiro faz caber. A conta só fecha a partir de 1184: 80 + 16 de
+ * respiro <= coluna − 100, ou seja, coluna >= 196, ou seja, largura >= 1184.
+ *
+ * A saída é o outro eixo. A capitular vive numa faixa VERTICAL curta — o alto
+ * do primeiro parágrafo —, então abaixo de 1184 o trilho começa depois dela.
+ * Como ele é sticky, some a diferença no primeiro rolar: o que muda é só onde
+ * a coluna nasce, não onde ela fica.
+ *
+ * ⚠️ `:has()` de propósito, como no recuo da própria capitular: matéria que
+ * abre com aspas, travessão ou número não tem letra pendurada, e aí não há o
+ * que desviar — o trilho nasce no alto do corpo, como em qualquer outra
+ * largura.
+ */
+@media (min-width: 1100px) {
+	.si-article__body:has(.si-capitular) .si-article__rail {
+		/* 96 da letra − 11 do recuo negativo dela + 16 de respiro = 101. */
+		top: calc(var(--si-font-size-dropcap) + var(--si-space-2));
+	}
+}
+
+/* Daqui para cima a margem abriga os dois lado a lado, e o desvio sai. */
+@media (min-width: 1184px) {
+	.si-article__body:has(.si-capitular) .si-article__rail {
+		top: 0;
+	}
+}
+
+/*
+ * Conferência da geometria inteira, medida em 01/09/2026. O respiro de 16px
+ * entre o trilho e o que vier à direita dele sai EXATO em toda largura, porque
+ * o `max()` do trilho e o do anúncio (seção 4.2) são a mesma conta deslocada de
+ * 80 — a largura do trilho mais o respiro.
+ *
+ *   largura | trilho    | à direita dele      | folga | capitular
+ *   1100    |  16– 80   | capitular em 54*    |  —    | desviada para baixo
+ *   1183    |  16– 80   | capitular em 91.5*  |  —    | desviada para baixo
+ *   1184    |  16– 80   | capitular em 96     |  16   | no alto do corpo
+ *   1280    |  16– 80   | anúncio em 96       |  16   | em 144
+ *   1344    |  16– 80   | anúncio em 96       |  16   | em 176
+ *   1440    |  64–128   | anúncio em 144      |  16   | em 224
+ *   1920    | 304–368   | anúncio em 384      |  16   | em 464
+ *
+ *   * abaixo de 1184 a capitular cruza o trilho no eixo x; o que os separa é o
+ *     desvio vertical acima, não folga lateral.
+ *
+ * ⚠️ DE 1344 PARA CIMA NADA MUDOU em relação ao que já estava publicado: os
+ * dois `max()` caem no braço fixo (-260 e -180) e a tela é a mesma pixel a
+ * pixel. A faixa 1280–1343 é a única em que o billboard fica menor que 1152.
+ *
+ * ⚠️ `100vw` inclui a barra de rolagem clássica onde ela existe (Windows,
+ * Linux). Lá tudo desloca ~7px para a esquerda e o respiro de 16 entre trilho e
+ * anúncio se mantém — o que encolhe é só a margem até a borda da tela. Medido
+ * com barra sobreposta (macOS), onde o deslocamento é zero.
+ */
+
+/* =====================================================================
+ * 4. CORPO DA MATÉRIA
+ * ===================================================================== */
+
+/*
+ * Respiro de 24px entre blocos de primeiro nível (parágrafos e os blocos
+ * injetados). Margin-top em vez de bottom: não sobra espaço morto no fim.
+ */
+.si-article__content > * + * {
+	margin-top: var(--si-space-6);
+}
+
+/*
+ * Corpo da matéria em serifada — `L2-17` da lista 2 do cliente (18/08/2026):
+ * "Fonte: usar fonte serifada".
+ *
+ * ⚠️ Escopo: só `.si-article__content`, que é o invólucro do `the_content` da
+ * matéria. Card, item de lista e linha de arquivo têm classe própria e seguem
+ * em Inter — conferido depois da mudança na home, na Editoria e na busca.
+ *
+ * ⚠️ Usa --si-font-serif-TEXT (Georgia), não a --si-font-serif (Playfair). O
+ * porquê está no comentário do token: a Playfair é display, tem olho menor que
+ * a Inter e o tema não carrega itálico dela. Ver N-14.
+ *
+ * Corpo, entrelinha e cor NÃO mudam: seguem 17px/1,75, que é decisão do Style
+ * Guide e não estava em questão.
+ */
+.si-article__content {
+	font-family: var(--si-font-serif-text);
+}
+
+/*
+ * O que é injetado no corpo NÃO herda a serifada: anúncio, citação, caixa
+ * Recomendadas e o bloco de Questões essenciais têm voz própria, e três deles
+ * já declaram a família. A regra devolve a sans ao que é interface dentro do
+ * texto — metadados e rótulos —, para a serifada ficar sendo só o texto lido.
+ */
+.si-article__content :is(.si-meta, .si-kicker, .si-ad, .si-card__meta) {
+	font-family: var(--si-font-sans);
+}
+
+/* Contém o float da caixa Recomendadas antes do bloco seguinte. */
+.si-article__content::after {
+	content: "";
+	display: block;
+	clear: both;
+}
+
+/* ---------------------------------------------------------------------
+ * 4.1 Capitular (nó 200:1004)
+ * -------------------------------------------------------------------
+ * A letra vem embrulhada num `.si-capitular` pelo `si_single_capitular()`,
+ * e NÃO é um `::first-letter`. O motivo está no docblock daquela função, e em
+ * uma frase: com o pseudo-elemento não há como garantir que a capitular não
+ * empurre o texto. O float sempre reserva a largura do glifo, `shape-outside`
+ * e `transform` não são aplicados ao pseudo-elemento, e a margem negativa fixa
+ * não fecha porque as maiúsculas da Playfair vão de 35px (J) a 92,9px (W) no
+ * corpo de 96 — 58px de variação.
+ *
+ * **Um mecanismo só, em toda largura:** a letra sai do fluxo e é pendurada à
+ * esquerda da coluna, numa ÁREA FIXA de 1em, ancorada pela borda direita. O
+ * texto nunca é empurrado e as linhas começam sempre juntas.
+ *
+ * O que muda com a largura é só DE ONDE vem o espaço da área:
+ *   - de 1024px para cima, da margem da própria página;
+ *   - abaixo disso a página não tem margem — a coluna começa a 24px da borda —,
+ *     então a coluna inteira recua e a área ocupa esse recuo. Decidido com o
+ *     cliente em 21/08/2026, entre três saídas medidas; o custo é a coluna de
+ *     leitura a 375px cair de 327px para 227px.
+ */
+
+/*
+ * O recuo que abriga a capitular onde a página não tem margem.
+ *
+ * ⚠️ `:has()` de propósito: sem capitular não há o que abrigar, e a coluna não
+ * deve recuar à toa. Acontece quando a matéria abre com aspas, travessão ou
+ * número — casos em que `si_single_capitular()` não embrulha nada.
+ */
+.si-article__content:has(.si-capitular) {
+	padding-left: calc(var(--si-font-size-dropcap) + var(--si-space-1));
+}
+
+@media (min-width: 1024px) {
+	/* Daqui para cima a margem da página abriga a letra; o recuo sai. */
+	.si-article__content:has(.si-capitular) {
+		padding-left: 0;
+	}
+}
+
+/* O parágrafo é a referência de posição da letra. */
+.si-article__content > p:first-of-type {
+	position: relative;
+}
+
+.si-capitular {
+	position: absolute;
+	top: 0;
+	right: 100%;
+
+	/*
+	 * ⚠️ **Área fixa, do tamanho da maior maiúscula.** `1em` do corpo da
+	 * capitular são 96px, e a mais larga da Playfair Bold é o "W" com 92,9px —
+	 * nenhuma letra transborda. Com a área fixa, a garantia deixa de ser
+	 * consequência da medida do glifo e passa a ser estrutural: a capitular
+	 * ocupa sempre a mesma faixa, e essa faixa termina antes da coluna.
+	 *
+	 * ⚠️ O glifo é alinhado à DIREITA dentro da área, e não à esquerda. Medido
+	 * no frame `124:3271`: a coluna começa em x=1027 e o "U" ocupa 932..1013 —
+	 * 14px de vão até o texto. É o vão que o desenho fixa, não a borda
+	 * esquerda. Ancorando pela esquerda numa faixa de 95px, o vão viraria 2px
+	 * num "W" e 60px num "J"; pela direita, é o mesmo em qualquer letra.
+	 *
+	 * (A blocagem do posicionamento absoluto é o que faz o `text-align` valer:
+	 * o span deixa de ser inline.)
+	 */
+	width: 1em;
+	text-align: right;
+
+	/*
+	 * ⚠️ O vão que se vê é maior que esta margem: o glifo não preenche a
+	 * própria caixa, e a folga lateral da Playfair acrescenta cerca de 7px no
+	 * corpo de 96. Medido por pixel: 4px de margem resultam em ~11px de vão, e
+	 * é o que aproxima os 14px do frame. Mexer aqui às cegas erra por essa
+	 * diferença.
+	 */
+	margin-right: var(--si-space-1);
+	color: var(--si-color-brand-primary);
+	font-family: var(--si-font-serif);
+	/* 96px do frame; 1.2 é a entrelinha aplicada lá (115,2/96). */
+	font-size: var(--si-font-size-dropcap);
+	font-weight: var(--si-font-weight-bold);
+	line-height: 1;
+	/*
+	 * `L2-18` — "alinhar pelo alto com a primeira linha do texto".
+	 *
+	 * ⚠️ O que se alinha é a TINTA do glifo, não a caixa do elemento. Uma
+	 * correção anterior mediu a caixa, viu-a 20px acima da linha e empurrou
+	 * 20px para baixo — mas a Playfair tem folga interna grande no corpo de
+	 * 96px, então a letra desenhada continuava **31px abaixo** do topo do
+	 * texto. Medido por pixel em 1440, 1024 e 375px: os três davam +31.
+	 *
+	 * Tirar o respiro de 20px já sobe a letra outros 20; o recuo negativo
+	 * completa os 11px que faltam. Em `em`, e não em px, para acompanhar o
+	 * corpo da capitular caso ele mude.
+	 */
+	margin-top: -0.115em;
+}
+
+/* ---------------------------------------------------------------------
+ * 4.2 Anúncio dentro do corpo
+ * -------------------------------------------------------------------
+ * O ad-slot é desenhado para a largura do container (1200px); dentro da
+ * coluna de 792 ele escapa pelas margens negativas — só quando as margens
+ * de 180px existem.
+ */
+
+@media (min-width: 1280px) {
+	/*
+	 * Sangra os mesmos -180px de sempre, MENOS onde isso não deixaria espaço
+	 * para o trilho de compartilhar, que de 1100 para cima flutua à esquerda.
+	 * O trilho precisa de 96px (16 de tela + 64 dele + 16 de respiro), e só há
+	 * tanto à esquerda de um billboard de 1152 a partir de 1344.
+	 *
+	 * Abaixo disso o anúncio encolhe o necessário e continua centrado — de 1088
+	 * em 1280 a 1152 em 1344, sem degrau. De 1344 para cima o `max()` cai no
+	 * braço fixo e a sangria é exatamente a de antes. Ver a seção 3 do trilho.
+	 */
+	.si-article__content .si-ad {
+		margin-inline: max(-180px, calc(96px - (100vw - 792px) / 2));
+	}
+}
+
+/* ---------------------------------------------------------------------
+ * 4.3 Citação em destaque (si_pull_quote)
+ * -------------------------------------------------------------------
+ * ⚠️ Sem referência de pixel no frame — visual derivado da citação da home
+ * (fundo vinho, aspas, serifada), a validar com o designer. A largura de
+ * 576px é a mesma do texto estreitado ao lado da caixa Recomendadas.
+ */
+
+.si-article__quote {
+	max-width: 576px;
+	margin-inline: auto;
+	padding: var(--si-space-6);
+	background-color: var(--si-color-brand-primary);
+	color: var(--si-color-brand-on-primary);
+}
+
+.si-article__quote-aspas {
+	display: block;
+	margin-bottom: var(--si-space-3);
+}
+
+/* Ícone preenchido, não traçado — mesmo caso da citação da home. */
+.si-article__quote-aspas .si-icon path {
+	fill: currentColor;
+	stroke: none;
+}
+
+.si-article__quote-texto {
+	font-family: var(--si-font-serif);
+	font-size: var(--si-font-size-h4);
+	font-weight: var(--si-font-weight-h4);
+	line-height: 1.4;
+	letter-spacing: var(--si-letter-spacing-h4);
+}
+
+.si-article__quote-autor {
+	margin-top: var(--si-space-4);
+	color: var(--si-color-brand-on-primary-strong);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-caption);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-caption);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+}
+
+/* ---------------------------------------------------------------------
+ * 4.4 Caixa Recomendadas (nó 124:4301)
+ * -------------------------------------------------------------------
+ * Base: bloco cheio entre parágrafos. Em >=1024 flutua à direita e o texto
+ * contorna; em >=1280 vaza 100px para a margem direita, como no frame.
+ */
+
+.si-article__aside {
+	padding: var(--si-space-8) var(--si-space-6);
+	background-color: var(--si-color-surface-subtle);
+}
+
+/* Título em 18/21,3 (frame), não nos 28px do componente. */
+.si-article__aside .si-section-header__titulo {
+	font-size: var(--si-font-size-item-media);
+	line-height: var(--si-line-height-item-media);
+}
+
+.si-article__aside .si-section-header {
+	margin-bottom: var(--si-space-6);
+}
+
+@media (min-width: 1024px) {
+	.si-article__aside {
+		float: right;
+		width: 292px;
+		/* 24px até o texto: 8px de vão do frame + 16px de respiro da coluna
+		 * estreitada (nó 124:4300). */
+		margin-left: var(--si-space-6);
+		margin-bottom: var(--si-space-6);
+	}
+}
+
+@media (min-width: 1280px) {
+	.si-article__aside {
+		/* Vazamento do frame: a caixa termina 100px além da coluna de 792. */
+		margin-right: -100px;
+	}
+}
+
+/* =====================================================================
+ * 5. PERGUNTAS-CHAVE (nó 127:4380)
+ * ===================================================================== */
+
+.si-article__faq {
+	/* Garante que o bloco fique abaixo de qualquer float do corpo. */
+	clear: both;
+	padding-block: var(--si-space-6);
+	/* Fio de fechamento do bloco — cinza, não o preto do section-header. */
+	border-bottom: 1px solid var(--si-color-border-default);
+}
+
+.si-article__faq-titulo {
+	padding-block: var(--si-space-2);
+	margin-bottom: var(--si-space-6);
+	border-bottom: 1px solid var(--si-color-border-default);
+	font-size: var(--si-font-size-item-media);
+	line-height: var(--si-line-height-item-media);
+}
+
+.si-article__faq-item {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--si-space-3);
+}
+
+/* Célula de 24px da seta, alinhada ao topo da pergunta. */
+.si-article__faq-seta {
+	display: flex;
+	flex: 0 0 24px;
+	justify-content: center;
+	padding-top: var(--si-space-1);
+	color: var(--si-color-brand-primary);
+}
+
+.si-article__faq-seta .si-icon {
+	width: 16px;
+	height: 16px;
+}
+
+.si-article__faq-corpo {
+	flex: 1;
+	min-width: 0;
+}
+
+.si-article__faq-pergunta {
+	font-size: var(--si-font-size-item-media);
+	line-height: var(--si-line-height-item-media);
+}
+
+/*
+ * `L2-21` — "trocar respostas para fonte serifada". Mesma família do corpo da
+ * matéria, pela mesma razão: é texto para ler, não rótulo.
+ *
+ * A PERGUNTA não foi tocada — o pedido é só das respostas. Ela é um <h3>, então
+ * já vinha em Playfair pela regra de headings do main.css, e continua vindo. O
+ * bloco fica com três vozes: display na pergunta, serifada de texto na resposta
+ * e sans nos metadados.
+ */
+.si-article__faq-resposta {
+	margin-top: var(--si-space-1);
+	color: var(--si-color-text-secondary);
+	font-family: var(--si-font-serif-text);
+}
+
+/* No frame os blocos de pergunta são contíguos; um respiro mínimo separa
+ * respostas longas do par seguinte. */
+.si-article__faq-item + .si-article__faq-item {
+	margin-top: var(--si-space-3);
+}
+
+/* =====================================================================
+ * 6. CONTEÚDO PATROCINADO (nó 127:4739)
+ * =====================================================================
+ * Moldura de FullBanner (rótulo entre fios + fio de fechamento, classes do
+ * ads.css) com três cards de conteúdo sobre fundo muted.
+ */
+
+.si-sponsored__inner {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-6);
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding: var(--si-space-6) var(--si-container-gutter);
+}
+
+/* Fio de fechamento, como nas faixas de anúncio. */
+.si-sponsored__inner::after {
+	content: "";
+	height: 1px;
+	background-color: var(--si-color-border-default);
+}
+
+/*
+ * O teto de 376px é a largura do card no frame: com menos de três posts a
+ * grade não estica — os cards ficam à esquerda, no tamanho desenhado.
+ * Colunas por breakpoint em vez de auto-fit: com o teto definido, o auto-fit
+ * conta as faixas pela largura máxima e entrega 2 colunas onde cabem 3.
+ */
+.si-sponsored__cards {
+	display: grid;
+	grid-template-columns: minmax(0, 376px);
+	gap: var(--si-space-6);
+}
+
+@media (min-width: 480px) {
+	.si-sponsored__cards {
+		grid-template-columns: repeat(2, minmax(0, 376px));
+	}
+}
+
+@media (min-width: 1024px) {
+	.si-sponsored__cards {
+		grid-template-columns: repeat(3, minmax(0, 376px));
+	}
+}
+
+.si-sponsored__card {
+	padding: var(--si-space-6);
+	background-color: var(--si-color-surface-muted);
+}
+
+/* 24px entre a foto e o título, mais que os 8px do card padrão (frame). */
+.si-sponsored__card .si-card__media {
+	margin-bottom: var(--si-space-6);
+}
+
+/* =====================================================================
+ * 7. RECIRCULAÇÃO (nó 127:4537)
+ * =====================================================================
+ * "Mais lidas" (292px) + fio vertical de altura cheia + "Mais em {editoria}"
+ * (grade de 3 colunas). Empilha abaixo de 1024px, sem o fio.
+ */
+
+.si-article__recirc-inner {
+	display: grid;
+	gap: var(--si-space-8);
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding: var(--si-space-6) var(--si-container-gutter);
+}
+
+/* Títulos de seção em 22px (frame), não nos 28px do componente. */
+.si-article__recirc .si-section-header__titulo {
+	font-size: var(--si-font-size-h4);
+	line-height: var(--si-line-height-h4);
+}
+
+.si-article__recirc .si-section-header {
+	margin-bottom: var(--si-space-6);
+}
+
+/*
+ * Itens de "Mais lidas": respiro 12/16 medido no frame (nó 127:4656) — mais
+ * apertado que o 16/24 padrão do si-item. Override contextual; depende de o
+ * components.css vir antes.
+ */
+.si-article__recirc-col--lidas .si-item:not(:last-child) {
+	padding-bottom: var(--si-space-3);
+	margin-bottom: var(--si-space-4);
+}
+
+@media (min-width: 1024px) {
+	.si-article__recirc-inner {
+		/* 292px de coluna, como no frame; a grade ocupa o resto. */
+		grid-template-columns: 292px minmax(0, 1fr);
+		gap: 0;
+	}
+
+	/*
+	 * Sem a coluna das mais lidas, a grade vira de uma coluna só.
+	 *
+	 * ⚠️ Sem isto, "Mais em…" colapsa. A regra acima fixa DUAS trilhas, e o
+	 * `recirculation.php` só imprime a coluna das mais lidas quando há posts ou
+	 * quem olha pode editar. Faltando o vizinho, a coluna que sobra é
+	 * posicionada automaticamente na PRIMEIRA trilha — os 292px —, e os seis
+	 * cards espremem para ~96px cada, quebrando as palavras letra a letra.
+	 * Medido em 18/08/2026: 860px de coluna com o vizinho, 292 sem ele.
+	 * Registrado em N-16, docs/revisao-visual.md.
+	 *
+	 * ⚠️ Não é caso de borda de ambiente. O `L2-24` pôs recorte de 7 dias nas
+	 * mais lidas, então basta uma semana sem matéria publicada-e-lida para o
+	 * leitor anônimo cair aqui, em produção.
+	 *
+	 * Descartadas: `grid-column: 2` na coluna da editoria deixaria 292px de
+	 * branco à esquerda; imprimir sempre a coluna das mais lidas daria ao
+	 * leitor uma coluna vazia.
+	 *
+	 * ⚠️ Navegador sem `:has()` ignora esta regra e volta ao colapso. É o mesmo
+	 * degradê já aceito na galeria da Cúpula (cupula.css), e o suporte é amplo
+	 * desde o fim de 2023 — Chrome 105, Safari 15.4, Firefox 121. Se a matriz de
+	 * navegadores do cliente exigir garantia, a alternativa sem `:has()` é o
+	 * `recirculation.php` acrescentar um modificador de classe quando imprimir
+	 * uma coluna só; aí a decisão é de PHP e não depende do seletor.
+	 */
+	.si-article__recirc-inner:not(:has(.si-article__recirc-col--lidas)) {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.si-article__recirc-col--lidas {
+		padding-inline: var(--si-space-6);
+	}
+
+	/*
+	 * Fio vertical de altura CHEIA: este toca o topo da seção — diferente
+	 * dos fios internos da grade, que começam abaixo do cabeçalho (fios
+	 * interrompidos, assinatura do layout).
+	 */
+	.si-article__recirc-col--editoria {
+		border-left: 1px solid var(--si-color-border-default);
+		/* 4px até o fio; os 24px restantes vêm do padding dos cards. */
+		padding-left: var(--si-space-1);
+	}
+
+	/* O cabeçalho da grade alinha pelo respiro de 8px do frame. */
+	.si-article__recirc-col--editoria .si-section-header {
+		margin-inline: var(--si-space-2);
+	}
+}
+
+/* ---------------------------------------------------------------------
+ * 7.1 Grade em 3 colunas
+ * -------------------------------------------------------------------
+ * Reusa a mecânica do si-grid (components.css): até 1023px valem as regras
+ * genéricas de 1 e 2 colunas; aqui entra só o degrau de 3, com os fios por
+ * nth-child no mesmo desenho da cols-4.
+ */
+
+@media (min-width: 1024px) {
+	.si-article__more .si-grid__inner {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	/* Desfaz o desenho de 2 colunas herdado do breakpoint de 480. */
+	.si-article__more .si-card:nth-child(n + 3) {
+		padding-top: 0;
+	}
+
+	.si-article__more .si-card:nth-child(n + 3)::before {
+		content: none;
+	}
+
+	/* Fio horizontal da segunda linha em diante. */
+	.si-article__more .si-card:nth-child(n + 4) {
+		padding-top: var(--si-card-respiro);
+	}
+
+	.si-article__more .si-card:nth-child(n + 4)::before {
+		content: "";
+	}
+
+	/*
+	 * Fio vertical em toda coluna que não abre linha. O :nth-child(n) no
+	 * reset não filtra nada — só iguala a especificidade da regra genérica
+	 * de duas colunas (`.si-grid .si-card:nth-child(2n)`), que senão
+	 * venceria e pintaria um fio a mais no card 4 (primeiro da 2ª linha,
+	 * que é par). Na cols-4 do components.css o problema não aparece
+	 * porque as colunas de abertura calham de ser sempre ímpares.
+	 */
+	.si-article__more .si-card:nth-child(n) {
+		border-left: 0;
+	}
+
+	.si-article__more .si-card:not(:nth-child(3n + 1)) {
+		border-left: 1px solid var(--si-color-border-default);
+	}
+}
+
+/* ---------------------------------------------------------------------
+ * 7.2 Paginação da Sub Home (`T-27`)
+ * -------------------------------------------------------------------
+ * Abaixo da grade de "Mais em {editoria}". O desenho é o do componente
+ * `.si-paginacao` (components.css), o mesmo do pé da Sub Home — o cliente
+ * pediu "no mesmo padrão". Aqui só o encaixe: 24px abaixo da grade e, a partir
+ * de 480px, o fio de cima recolhido ao recuo dos cards, para terminar onde os
+ * fios da grade terminam (fios interrompidos, assinatura do layout).
+ */
+
+.si-article__recirc .si-paginacao {
+	margin-top: var(--si-space-6);
+}
+
+/*
+ * ⚠️ O recuo só a partir de 480px. Abaixo, a coluna não comporta: com ele,
+ * "1 2 … 5 Próxima" pede 283px e sobram 279 em 375px, e o "Próxima" desce
+ * de linha. Ali vale a largura cheia da coluna — a mesma da Sub Home no
+ * celular. Em 320px nem a largura cheia basta e a linha quebra, como já
+ * quebra na própria Sub Home: o componente é o mesmo.
+ */
+@media (min-width: 480px) {
+	.si-article__recirc .si-paginacao {
+		margin-inline: var(--si-container-gutter);
+	}
+}
+
+/* =====================================================================
+ * 8. AVISOS DE BLOCO VAZIO
+ * =====================================================================
+ * Mesmo desenho dos avisos da home (que vivem no home.css e não carregam
+ * aqui): visíveis só para quem pode corrigir.
+ */
+
+.si-article__aviso {
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding: var(--si-space-4) var(--si-container-gutter);
+	border-left: 4px solid var(--si-color-state-warning);
+	background-color: var(--si-color-surface-subtle);
+	color: var(--si-color-text-secondary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+/* Variante embutida em coluna ou caixa: sem o invólucro de container. */
+.si-article__aviso--embutido {
+	max-width: none;
+	margin-inline: 0;
+	padding: var(--si-space-4);
+}
+
+/* ---------------------------------------------------------------------
+ * 9. Aviso de citação ao copiar
+ * -------------------------------------------------------------------
+ * Faixa discreta no pé da tela, some sozinha. Fica sobre o conteúdo em vez
+ * de empurrá-lo: aparecer no meio da leitura não pode reposicionar o texto
+ * que a pessoa está lendo.
+ */
+
+.si-aviso-copia {
+	position: fixed;
+	right: var(--si-space-4);
+	bottom: var(--si-space-4);
+	left: var(--si-space-4);
+	z-index: 90;
+	display: flex;
+	align-items: flex-start;
+	gap: var(--si-space-3);
+	max-width: 520px;
+	margin-inline: auto;
+	padding: var(--si-space-4);
+	border-left: 3px solid var(--si-color-border-brand);
+	background-color: var(--si-color-surface-overlay);
+	box-shadow: var(--si-shadow-drawer);
+	opacity: 0;
+	transform: translateY(8px);
+	transition: opacity 200ms ease, transform 200ms ease;
+}
+
+/*
+ * ⚠️ SEM ISTO O AVISO ENGOLE O CLIQUE DA PÁGINA INTEIRA.
+ *
+ * O `<div>` nasce com o atributo `hidden`, e o JS o liga e desliga — a intenção
+ * sempre foi tirá-lo da ordem de leitura e do foco quando não está à vista. Só
+ * que `display: flex`, ali em cima, VENCE o `[hidden] { display: none }` do
+ * navegador: regra de autor ganha da regra do agente de usuário, e não é questão
+ * de especificidade — é de origem, então nem `!important` do lado do navegador
+ * mudaria isso.
+ *
+ * O resultado era uma faixa de 520×68 permanentemente montada, `position: fixed`
+ * no pé da tela e com `z-index: 90`, invisível por `opacity: 0` — mas opacidade
+ * não tira do teste de acerto. Tudo que caísse sob ela ficava inclicável, e o
+ * caso visível eram os ícones de rede do RODAPÉ: presentes, com href, e mortos
+ * ao clique. O botão "Fechar" de dentro também respondia ao Tab.
+ */
+.si-aviso-copia[hidden] {
+	display: none;
+}
+
+.si-aviso-copia.is-visivel {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.si-aviso-copia__texto {
+	margin: 0;
+	color: var(--si-color-text-primary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+.si-aviso-copia__fechar {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	/* Alvo de toque mínimo, ainda que o ícone seja pequeno. */
+	width: var(--si-space-11);
+	height: var(--si-space-11);
+	margin: calc(var(--si-space-2) * -1) calc(var(--si-space-2) * -1) 0 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--si-color-icon-default);
+	cursor: pointer;
+}
+
+.si-aviso-copia__fechar:hover {
+	color: var(--si-color-icon-active);
+}
+
+.si-aviso-copia__fechar .si-icon {
+	width: 12px;
+	height: 12px;
+}
+
+/* Quem pediu menos movimento recebe o aviso sem deslizar. */
+@media (prefers-reduced-motion: reduce) {
+	.si-aviso-copia {
+		transform: none;
+		transition: opacity 1ms linear;
+	}
+}
+
+/* =====================================================================
+ * 10. DOCUMENTO PARA BAIXAR (L2-31)
+ * =====================================================================
+ * Bloco `core/file` do WordPress, liberado no editor em 18/08/2026. O core já
+ * entrega a estrutura — nome do arquivo como link e botão de baixar —; aqui ele
+ * só ganha a voz do tema.
+ *
+ * ⚠️ SEM FRAME NO FIGMA. Nenhuma das oito páginas do arquivo desenha documento
+ * anexo. O tratamento abaixo é o mínimo seguro: caixa discreta com o fio da
+ * marca à esquerda, na medida da coluna de leitura. A validar com o designer —
+ * registrado como N-17 em docs/revisao-visual.md.
+ */
+
+.si-article__content .wp-block-file {
+	/*
+	 * ⚠️ `clear` pelo mesmo motivo do carrossel e da imagem alinhada: o corpo
+	 * tem dois flutuantes — a caixa de recomendadas e a foto alinhada —, e um
+	 * boxe DELIMITADO ao lado deles parece acidente. Texto envolvendo um float
+	 * é leitura normal; uma caixa de download espremida a 451px de 792 não é.
+	 * Medido em 25/08/2026, ao lado da foto vertical.
+	 */
+	clear: both;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--si-space-3) var(--si-space-4);
+	padding: var(--si-space-4) var(--si-space-5);
+	border-left: 3px solid var(--si-color-brand-primary);
+	background-color: var(--si-color-surface-subtle);
+	/* Sans no meio do corpo serifado: é interface, não texto de leitura. */
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+/*
+ * O nome do arquivo é o link, e é ele que o leitor de tela anuncia — por isso
+ * ocupa o espaço todo antes do botão, em vez de virar um "clique aqui".
+ */
+.si-article__content .wp-block-file__textlink {
+	flex: 1 1 12rem;
+	color: var(--si-color-text-primary);
+	font-weight: var(--si-font-weight-label);
+	text-decoration: underline;
+}
+
+.si-article__content .wp-block-file__textlink:hover {
+	color: var(--si-color-text-link);
+}
+
+/* Botão de baixar no padrão das ações do tema, como o "Assine" do cabeçalho. */
+.si-article__content .wp-block-file__button {
+	flex: 0 0 auto;
+	min-height: 44px;
+	display: inline-flex;
+	align-items: center;
+	padding-inline: var(--si-space-4);
+	border-radius: 0;
+	background-color: var(--si-color-brand-primary);
+	color: var(--si-color-brand-on-primary);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+	text-decoration: none;
+}
+
+.si-article__content .wp-block-file__button:hover {
+	background-color: var(--si-color-brand-primary-hover);
+	color: var(--si-color-brand-on-primary);
+}
+
+/*
+ * ⚠️ O visualizador embutido do core fica DESLIGADO por CSS quando o editor o
+ * ativa sem querer: um `<object>` de PDF dentro da coluna de leitura quebra a
+ * rolagem no celular e não tem frame que o justifique. O link e o botão
+ * continuam valendo. Se o cliente pedir visualizador, aí é decisão de design.
+ */
+.si-article__content .wp-block-file__embed {
+	display: none;
+}
+
+/* =====================================================================
+ * 11. CARROSSEL DE FOTOS (L2-04)
+ * =====================================================================
+ * Estilo do bloco `core/gallery`: as fotos deixam a grade e viram uma faixa
+ * horizontal, uma de cada vez.
+ *
+ * ⚠️ SEM FRAME NO FIGMA. Nenhuma das oito páginas do arquivo desenha carrossel.
+ * O tratamento abaixo é derivado do que o tema já tem — proporção 3:2 das fotos
+ * do corpo, legenda no padrão da `wp-element-caption`, seta do `icon-seta.svg`
+ * e cor da marca nos controles. Registrado como N-18, a validar com o designer.
+ *
+ * ⚠️ O TRANSPORTE É `scroll-snap`, não transform por JavaScript. Essa escolha
+ * carrega três coisas de graça:
+ *   - **swipe no toque**, que é rolagem nativa e não precisa de script;
+ *   - **teclado**, porque a faixa é um contêiner rolável de verdade;
+ *   - **`prefers-reduced-motion`**, resolvido trocando `scroll-behavior`.
+ * O JavaScript só acrescenta as setas e o aviso de posição. Sem ele, a faixa
+ * continua rolável na horizontal — degrada para algo usável, não para uma pilha
+ * quebrada.
+ *
+ * ⚠️ NÃO alcança a galeria comum nem a da Cúpula: tudo aqui exige
+ * `.is-style-carrossel`. Trocar o estilo no editor devolve a grade.
+ * ------------------------------------------------------------------- */
+
+.si-article__content .wp-block-gallery.is-style-carrossel {
+	/* Desfaz a grade do core: aqui as fotos são uma faixa. */
+	display: block;
+	position: relative;
+}
+
+.si-article__content .wp-block-gallery.is-style-carrossel .si-carrossel__trilho,
+.si-article__content .wp-block-gallery.is-style-carrossel:not(:has(.si-carrossel__trilho)) {
+	display: flex;
+	/*
+	 * ⚠️ `flex-wrap` e `align-items` NÃO são enfeite: o core imprime
+	 * `.is-layout-flex{flex-wrap:wrap;align-items:center}` na própria página,
+	 * pelo suporte de layout que o bloco de galeria declara. Sem estas duas
+	 * linhas cada slide de `flex: 0 0 100%` cai numa linha própria e o
+	 * carrossel vira uma PILHA VERTICAL — `scrollWidth` igual a `clientWidth`,
+	 * nada para rolar e as setas sem efeito. Medido em 19/08/2026.
+	 */
+	flex-wrap: nowrap;
+	align-items: flex-start;
+	gap: var(--si-space-4);
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	scroll-behavior: smooth;
+	/* Sem barra de rolagem à vista: quem usa mouse tem as setas, quem usa
+	 * toque arrasta. A rolagem continua existindo para o teclado. */
+	scrollbar-width: none;
+}
+
+.si-article__content .wp-block-gallery.is-style-carrossel::-webkit-scrollbar,
+.si-article__content .wp-block-gallery.is-style-carrossel .si-carrossel__trilho::-webkit-scrollbar {
+	display: none;
+}
+
+/*
+ * Cada foto ocupa a faixa inteira e ancora no início. `flex: 0 0 100%` é o que
+ * impede o encolhimento que o flex faria por padrão — sem ele as fotos se
+ * espremeriam todas na largura visível, que é o oposto de um carrossel.
+ */
+.si-article__content .wp-block-gallery.is-style-carrossel figure.wp-block-image {
+	flex: 0 0 100%;
+	width: 100%;
+	margin: 0;
+	scroll-snap-align: start;
+}
+
+/* Mesma proporção das demais fotos do corpo (3:2), para a faixa não pular de
+ * altura entre um slide e outro. */
+.si-article__content .wp-block-gallery.is-style-carrossel figure.wp-block-image img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+	background-color: var(--si-color-surface-muted);
+}
+
+/* Legenda por slide, na voz das demais legendas do corpo. */
+.si-article__content .wp-block-gallery.is-style-carrossel figcaption {
+	margin-top: var(--si-space-2);
+	color: var(--si-color-text-tertiary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+	text-align: left;
+}
+
+/* ---------------------------------------------------------------------
+ * 10.9 Vídeo de abertura da matéria
+ * -------------------------------------------------------------------
+ * Ocupa o lugar da imagem destacada quando o campo "Vídeo destaque (YouTube)"
+ * está preenchido. Pedido do cliente em 04/09/2026, com a instrução de não
+ * mexer no layout — o vídeo entra onde a foto entrava.
+ * ------------------------------------------------------------------- */
+
+.si-video-abertura__quadro {
+	/*
+	 * ⚠️ A proporção mora AQUI, no invólucro, e não no `iframe`.
+	 *
+	 * `iframe` com width/height fixos não encolhe com a tela, e o truque antigo
+	 * do `padding-bottom: 56.25%` existia porque `aspect-ratio` não existia.
+	 * Hoje existe: o quadro guarda o 16:9 em qualquer largura, e o player
+	 * preenche. Sem cálculo, sem JavaScript, sem deslocamento enquanto carrega.
+	 */
+	position: relative;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	background-color: var(--si-color-surface-muted);
+}
+
+.si-video-abertura__player {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	border: 0;
+}
+
+/* ---------------------------------------------------------------------
+ * 11.0 Carrossel de abertura da matéria
+ * -------------------------------------------------------------------
+ * Ocupa o lugar da imagem destacada quando o campo "Carrossel de fotos" está
+ * preenchido. Pedido do cliente em 03/09/2026.
+ *
+ * ⚠️ Reusa os CONTROLES da galeria do corpo — `.si-carrossel__seta`,
+ * `__setas`, `__controles` e `__posicao` já são globais, e é o `carrossel.js`
+ * que os cria em volta desta faixa. O que muda entre os dois carrosséis é só a
+ * pista, e é por isso que estas regras existem em vez de eu escopar as da
+ * galeria para dois seletores.
+ * ------------------------------------------------------------------- */
+
+.si-abertura {
+	display: flex;
+	/* Mesmas duas linhas da galeria do corpo, pelo mesmo motivo: sem elas cada
+	 * slide de `flex: 0 0 100%` cai numa linha própria e a faixa vira pilha. */
+	flex-wrap: nowrap;
+	align-items: flex-start;
+	gap: var(--si-space-4);
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	scroll-behavior: smooth;
+	/* Sem barra à vista: há setas para mouse e arraste para toque. A rolagem
+	 * continua existindo para o teclado. */
+	scrollbar-width: none;
+}
+
+.si-abertura::-webkit-scrollbar {
+	display: none;
+}
+
+.si-abertura__slide {
+	flex: 0 0 100%;
+	width: 100%;
+	margin: 0;
+	scroll-snap-align: start;
+}
+
+/*
+ * A mesma proporção 3:2 da foto de abertura comum — é o que impede a faixa de
+ * pular de altura entre um slide e outro, e o que mantém o carrossel do mesmo
+ * tamanho da imagem destacada que ele substitui.
+ */
+.si-abertura__img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+	background-color: var(--si-color-surface-muted);
+}
+
+/* Quem pediu menos movimento não recebe o deslize suave da troca automática —
+ * o giro sozinho já fica desligado pelo script; isto cobre o clique nas setas. */
+@media (prefers-reduced-motion: reduce) {
+	.si-abertura {
+		scroll-behavior: auto;
+	}
+}
+
+/* ---------------------------------------------------------------------
+ * 11.1 Controles
+ * ------------------------------------------------------------------- */
+
+/*
+ * Envelope que ancora as setas. Criado pelo JavaScript — sem ele não há seta
+ * para ancorar, e a faixa segue rolável do mesmo jeito.
+ * ⚠️ O `margin-top` de 24px que a galeria recebia de `.si-article__content >
+ * * + *` passa a cair aqui, porque o envelope é que virou filho direto do
+ * corpo. O respiro acima do carrossel não muda.
+ */
+.si-carrossel {
+	position: relative;
+}
+
+/*
+ * Camada das setas, presa ao topo e com a MESMA proporção da foto (3:2), para
+ * que `top: 50%` caia no meio da imagem.
+ * ⚠️ Amarrar em `height: 100%` daria no mesmo resultado hoje, porque a legenda
+ * do core é sobreposta e a faixa tem exatamente a altura da foto. Mas
+ * quebraria no dia em que a legenda descer para baixo da imagem: as setas
+ * desceriam junto e ficariam fora de centro. A proporção não depende disso.
+ */
+.si-carrossel__setas {
+	position: absolute;
+	top: 0;
+	right: 0;
+	left: 0;
+	aspect-ratio: 3 / 2;
+	/* A camada cobre a foto inteira. Sem isto ela roubaria o arraste no toque
+	 * e qualquer clique na imagem; só os botões voltam a receber evento. */
+	pointer-events: none;
+}
+
+/* Contador em linha própria abaixo da foto — as setas saíram daqui. */
+.si-carrossel__controles {
+	margin-top: var(--si-space-3);
+}
+
+/*
+ * Seta reaproveitada do `icon-seta.svg`, o mesmo chevron do "Ver tudo em…" e
+ * das Questões essenciais — não foi desenhado ícone novo. A da esquerda é o
+ * mesmo arquivo espelhado.
+ */
+.si-carrossel__seta {
+	position: absolute;
+	top: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/*
+	 * 44px de alvo de toque, o mínimo que o tema usa em toda ação — e o mesmo
+	 * em TODAS as larguras. Encolher no celular contrariaria a regra de alvo
+	 * de toque do próprio projeto, e esconder tiraria a única pista visível de
+	 * que há mais fotos adiante: a faixa não tem barra de rolagem.
+	 */
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 1px solid var(--si-color-border-default);
+	/* Véu claro: o chevron do `icon-seta.svg` é vinho chumbado no arquivo e
+	 * sumiria sobre foto escura. Ver o token para a conta de contraste. */
+	background-color: var(--si-color-overlay-veil);
+	color: var(--si-color-brand-primary);
+	transform: translateY(-50%);
+	cursor: pointer;
+	/* Devolve o evento que a camada acima recusa. */
+	pointer-events: auto;
+}
+
+/*
+ * ATÉ 1023px a seta fica SOBRE a foto, colada na borda: a coluna do texto
+ * encosta na margem da tela (24px de cada lado, medido em 375 e 768) e não há
+ * onde pôr um botão de 44px fora dela sem criar rolagem horizontal.
+ */
+.si-carrossel__seta--anterior {
+	left: var(--si-space-2);
+}
+
+.si-carrossel__seta--proximo {
+	right: var(--si-space-2);
+}
+
+@media (min-width: 768px) {
+	.si-carrossel__seta--anterior {
+		left: var(--si-space-3);
+	}
+
+	.si-carrossel__seta--proximo {
+		right: var(--si-space-3);
+	}
+}
+
+/*
+ * A PARTIR DE 1024px a seta sai de cima da foto e vai para a margem, com 12px
+ * de respiro. O vão medido comporta: 116px em 1024, 244px em 1280, 324px em
+ * 1440 — contra os 56px que o botão e o respiro ocupam. Em 1440, onde o trilho
+ * de compartilhar volta para a margem esquerda, ainda sobram 196px entre ele e
+ * a seta.
+ *
+ * ⚠️ O botão ultrapassa a coluna do texto de propósito. Nada o corta porque
+ * nem o envelope nem o corpo da matéria têm `overflow` — conferido; se algum
+ * ancestral ganhar `overflow: hidden`, a seta some sem aviso.
+ *
+ * O véu continua declarado e simplesmente deixa de aparecer: branco a 85%
+ * sobre o branco da página é invisível, e a seta volta a ser o botão limpo de
+ * fio cinza e chevron vinho. Nada a desligar.
+ */
+@media (min-width: 1024px) {
+	.si-carrossel__seta--anterior {
+		left: calc(-44px - var(--si-space-3));
+	}
+
+	.si-carrossel__seta--proximo {
+		right: calc(-44px - var(--si-space-3));
+	}
+}
+
+/*
+ * Foco sobre foto. O anel padrão do tema é vinho com 2px de afastamento, e
+ * sobre imagem escura ele desaparece. O halo branco preenche o afastamento e
+ * transborda o anel, então sobra sempre um contorno legível: claro contra foto
+ * escura, e o vinho no meio contra foto clara.
+ */
+.si-carrossel__seta:focus-visible {
+	box-shadow: 0 0 0 6px var(--si-color-surface-overlay);
+}
+
+.si-carrossel__seta:hover:not(:disabled) {
+	border-color: var(--si-color-border-brand);
+}
+
+/*
+ * Chegou na ponta: o botão fica desabilitado em vez de sumir. Controle que
+ * desaparece move os vizinhos e faz o leitor perder o alvo do clique.
+ */
+.si-carrossel__seta:disabled {
+	opacity: 0.35;
+	cursor: default;
+}
+
+.si-carrossel__seta--anterior .si-icon {
+	transform: scaleX(-1);
+}
+
+.si-carrossel__seta .si-icon {
+	width: 12px;
+	height: 12px;
+}
+
+/* Contador "2 de 5": diz onde se está sem depender de ver a faixa. */
+.si-carrossel__posicao {
+	color: var(--si-color-text-tertiary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+}
+
+/*
+ * Uma foto só não é carrossel: o script não imprime controles, e a regra
+ * abaixo desliga o snap para a foto se comportar como imagem comum.
+ */
+.si-article__content .wp-block-gallery.is-style-carrossel:not(:has(figure.wp-block-image:nth-child(2))) {
+	scroll-snap-type: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.si-article__content .wp-block-gallery.is-style-carrossel,
+	.si-article__content .wp-block-gallery.is-style-carrossel .si-carrossel__trilho {
+		scroll-behavior: auto;
+	}
+}
+
+/* =====================================================================
+ * 12. IMAGEM ALINHADA NO CORPO — TEXTO AO LADO (L2-32)
+ * ===================================================================== */
+
+/*
+ * ⚠️ Isto NÃO existia — e o pior: o editor fingia que sim. O controle de
+ * alinhamento aparecia na barra lateral, a classe era gravada no post, e o
+ * front a ignorava em silêncio.
+ *
+ * O motivo é preciso. A única regra do core que traz `float` é
+ * `.wp-block-image .alignleft` — seletor DESCENDENTE, herdado do markup antigo
+ * em que a classe ficava no `<img>`. O bloco moderno põe `alignleft` no
+ * `<figure>`, e para a forma composta o core só declara `display: table`.
+ * Em tema clássico, `.alignleft` sempre foi responsabilidade do tema, e este
+ * nunca a definiu. Medido em 20/08/2026: `float: none` e o texto começando
+ * 229px ABAIXO da foto.
+ */
+
+/*
+ * Base = telas estreitas, sem flutuação: foto de largura cheia e texto abaixo.
+ * Retrato mais texto ao lado não cabe numa coluna de 327px — a linha ficaria
+ * com uma dúzia de caracteres.
+ */
+.si-article__content .wp-block-image.alignleft,
+.si-article__content .wp-block-image.alignright {
+	display: block;
+	width: 100%;
+}
+
+.si-article__content .wp-block-image.alignleft img,
+.si-article__content .wp-block-image.alignright img {
+	width: 100%;
+	height: auto;
+}
+
+/*
+ * A legenda do core vem `display: table-caption`, que pede uma tabela por
+ * volta — e a figura acabou de virar `block`. Volta a ser bloco comum, preso à
+ * largura da figura: acompanha a foto e nunca atravessa o texto do lado.
+ */
+.si-article__content .wp-block-image.alignleft figcaption,
+.si-article__content .wp-block-image.alignright figcaption {
+	display: block;
+	text-align: left;
+}
+
+@media (min-width: 768px) {
+	.si-article__content .wp-block-image.alignleft,
+	.si-article__content .wp-block-image.alignright {
+		/*
+		 * 40% da coluna. Nos 792px do corpo a foto fica com ~317px e sobram
+		 * ~451px de texto ao lado — perto de 54 caracteres por linha em
+		 * Georgia 17px, dentro da faixa confortável de leitura. A 50% a linha
+		 * cairia para ~44, que já é picotado; a 30% a foto deixaria de ter
+		 * presença de foto.
+		 */
+		width: 40%;
+	}
+
+	.si-article__content .wp-block-image.alignleft {
+		float: left;
+		/* Mesma medida do respiro entre blocos do corpo. */
+		margin-right: var(--si-space-6);
+	}
+
+	.si-article__content .wp-block-image.alignright {
+		float: right;
+		margin-left: var(--si-space-6);
+	}
+
+	/*
+	 * ⚠️ `clear` NÃO é excesso de zelo — sem ele o recurso nasce estragado.
+	 *
+	 * O `.si-article__aside` do corpo já é `float: right`, com 292px. Uma foto
+	 * flutuando à esquerda na mesma faixa vertical deixa o texto espremido
+	 * ENTRE as duas: medido em 20/08/2026, linhas de 168 a 321px, perto de 31
+	 * caracteres — metade do que se lê sem esforço.
+	 *
+	 * `both`, e não `right`: duas imagens alinhadas seguidas também caberiam
+	 * lado a lado com 40% cada, o que ninguém pediu. Assim toda imagem
+	 * alinhada começa em linha limpa. Onde não há float acima, é inócuo.
+	 */
+	.si-article__content .wp-block-image.alignleft,
+	.si-article__content .wp-block-image.alignright {
+		clear: both;
+	}
+}
+
+/*
+ * ⚠️ Contenção do float, e por que ela é condicional.
+ *
+ * Float alto demais escapa do corpo da matéria e invade o que vem depois — o
+ * bloco de recirculação, o rodapé. `display: flow-root` cria um contexto de
+ * formatação que o segura, mas também desliga a fusão de margens do
+ * contêiner. Aplicá-lo em TODA matéria mudaria o espaçamento de páginas que
+ * não usam o recurso.
+ *
+ * Com o `:has()` a regra só existe onde há float, e matéria sem imagem
+ * alinhada segue byte a byte como estava — conferido.
+ */
+.si-article__content:has(> .wp-block-image.alignleft),
+.si-article__content:has(> .wp-block-image.alignright) {
+	display: flow-root;
+}
+
+/* =====================================================================
+ * 14. MENU DE COMPARTILHAR (L3-05)
+ * ===================================================================== */
+
+/*
+ * Alternativa do botão do alto quando a folha do sistema não abre. As opções
+ * são as mesmas do trilho — o menu não inventa uma segunda lista.
+ *
+ * ⚠️ A célula de ações precisa de `position: relative` para ancorá-lo. Ela não
+ * tinha: era só um flex encostado à direita.
+ */
+.si-article__meta-cell--acoes {
+	position: relative;
+}
+
+.si-share-menu {
+	position: absolute;
+	top: calc(100% + var(--si-space-2));
+	right: 0;
+	z-index: 20;
+	min-width: 200px;
+	border: 1px solid var(--si-color-border-default);
+	background-color: var(--si-color-surface-overlay);
+	box-shadow: var(--si-shadow-drawer);
+}
+
+.si-share-menu__lista {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.si-share-menu__link {
+	display: flex;
+	width: 100%;
+	align-items: center;
+	gap: var(--si-space-3);
+	/* 44px de alvo de toque, como as demais ações do tema. */
+	min-height: 44px;
+	padding: var(--si-space-2) var(--si-space-4);
+	border: 0;
+	background: none;
+	color: var(--si-color-text-primary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	text-align: left;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.si-share-menu__link:hover,
+.si-share-menu__link:focus-visible {
+	background-color: var(--si-color-surface-subtle);
+}
+
+/*
+ * O "copiar link" nasce `aria-disabled` e o script o habilita onde a API de
+ * área de transferência existe — mesma convenção do trilho. Enquanto isso, não
+ * finge ser clicável.
+ */
+.si-share-menu__link[aria-disabled="true"] {
+	opacity: 0.45;
+	cursor: default;
+}

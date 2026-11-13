@@ -1,0 +1,230 @@
+/**
+ * Saúde Insider — estilos base do tema.
+ *
+ * Ordem do arquivo: reset → tipografia base → utilitários.
+ *
+ * Os tokens (--si-*) NÃO são importados aqui: _tokens.css é enfileirado
+ * como estilo próprio em inc/enqueue.php e declarado dependência deste
+ * arquivo, o que garante a ordem de carregamento e dá cache busting
+ * independente para cada um.
+ *
+ * Layout de componente NÃO entra aqui. Cada área do site (header, home,
+ * matéria, rodapé) ganha o próprio arquivo em assets/css/, enfileirado
+ * separadamente em inc/enqueue.php.
+ */
+
+/* =====================================================================
+ * 1. RESET
+ * =====================================================================
+ * Enxuto de propósito: só o que corrige comportamento herdado do
+ * navegador. Nada de opinião visual — isso vem dos tokens.
+ */
+
+/* Box model previsível em tudo. */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+/* Zera as margens padrão; todo espaçamento vem dos tokens --si-space-*. */
+* {
+	margin: 0;
+}
+
+html {
+	/* Impede o Safari no iOS de aumentar a fonte ao girar a tela. */
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	min-height: 100vh;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+/* Mídia se comporta como bloco e nunca estoura o container. */
+img,
+picture,
+video,
+canvas,
+svg {
+	display: block;
+	max-width: 100%;
+	height: auto;
+}
+
+/* Campos de formulário herdam a tipografia em vez do padrão do sistema. */
+input,
+button,
+textarea,
+select {
+	font: inherit;
+	color: inherit;
+}
+
+/* Quebra URLs longas dentro de matérias em vez de estourar a coluna. */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	overflow-wrap: break-word;
+}
+
+/* Lista marcada como semântica não recebe marcador visual. */
+ul[role="list"],
+ol[role="list"] {
+	padding: 0;
+	list-style: none;
+}
+
+/* Foco visível e consistente — requisito de acessibilidade. */
+:focus-visible {
+	outline: 2px solid var(--si-color-border-brand);
+	outline-offset: 2px;
+}
+
+/* Respeita quem pediu menos animação nas preferências do sistema. */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		/* !important justificado: precisa vencer animações de plugins de terceiros. */
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* =====================================================================
+ * 2. TIPOGRAFIA BASE
+ * =====================================================================
+ * Aplica os tokens aos elementos nativos, para que qualquer HTML vindo do
+ * editor já nasça com a tipografia certa, sem precisar de classe.
+ */
+
+body {
+	background-color: var(--si-color-surface-page);
+	color: var(--si-color-text-primary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-body);
+	font-weight: var(--si-font-weight-body);
+	line-height: var(--si-line-height-body);
+	letter-spacing: var(--si-letter-spacing-body);
+}
+
+/* Títulos usam a serifada editorial. Os tamanhos são fluidos via clamp(). */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	color: var(--si-color-text-primary);
+	font-family: var(--si-font-serif);
+}
+
+h1 {
+	font-size: var(--si-font-size-h1);
+	font-weight: var(--si-font-weight-h1);
+	line-height: var(--si-line-height-h1);
+	letter-spacing: var(--si-letter-spacing-h1);
+}
+
+h2 {
+	font-size: var(--si-font-size-h2);
+	font-weight: var(--si-font-weight-h2);
+	line-height: var(--si-line-height-h2);
+	letter-spacing: var(--si-letter-spacing-h2);
+}
+
+h3 {
+	font-size: var(--si-font-size-h3);
+	font-weight: var(--si-font-weight-h3);
+	line-height: var(--si-line-height-h3);
+	letter-spacing: var(--si-letter-spacing-h3);
+}
+
+h4 {
+	font-size: var(--si-font-size-h4);
+	font-weight: var(--si-font-weight-h4);
+	line-height: var(--si-line-height-h4);
+	letter-spacing: var(--si-letter-spacing-h4);
+}
+
+h5 {
+	font-size: var(--si-font-size-h5);
+	font-weight: var(--si-font-weight-h5);
+	line-height: var(--si-line-height-h5);
+	letter-spacing: var(--si-letter-spacing-h5);
+}
+
+h6 {
+	font-size: var(--si-font-size-h6);
+	font-weight: var(--si-font-weight-h6);
+	line-height: var(--si-line-height-h6);
+	letter-spacing: var(--si-letter-spacing-h6);
+}
+
+/* Links editoriais e funcionais. */
+a {
+	color: var(--si-color-text-link);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.2em;
+}
+
+a:hover,
+a:focus-visible {
+	color: var(--si-color-text-link-hover);
+}
+
+/* Legenda de foto e crédito. */
+figcaption {
+	color: var(--si-color-text-tertiary);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+/* Fio editorial padrão — o separador mais usado no layout. */
+hr {
+	border: 0;
+	border-top: 1px solid var(--si-color-border-default);
+}
+
+/* =====================================================================
+ * 3. UTILITÁRIOS
+ * =====================================================================
+ * Só o mínimo de acessibilidade que os templates já usam.
+ */
+
+/* Conteúdo lido por leitor de tela, invisível na tela. */
+.si-visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	white-space: nowrap;
+	border: 0;
+	clip-path: inset(50%);
+}
+
+/* Link de pular para o conteúdo: aparece só ao receber foco pelo teclado. */
+.si-skip-link {
+	position: absolute;
+	top: 0;
+	left: -9999px;
+	z-index: 100;
+	padding: var(--si-space-2) var(--si-space-4);
+	background-color: var(--si-color-surface-overlay);
+	color: var(--si-color-text-link);
+}
+
+.si-skip-link:focus {
+	left: 0;
+}

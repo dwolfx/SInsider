@@ -1,0 +1,572 @@
+/**
+ * Saúde Insider — assinatura gratuita: telas de acesso e muro da exclusiva.
+ *
+ * Duas peças que dividem a mesma linguagem: as telas de cadastro, entrada e
+ * conta (.si-auth, nos modelos page-assine/entrar/conta) e o muro da matéria
+ * exclusiva (.si-exclusiva, em template-parts/assinante/muro.php). Como o
+ * leitor nunca pode ver que o portal é um WordPress (ver inc/assinantes.php),
+ * elas precisam parecer parte do jornal e não uma tela de sistema: Playfair
+ * nos títulos, Inter no corpo, vinho só onde há ação, fios finos no lugar de
+ * caixas com sombra e canto arredondado.
+ *
+ * Sobriedade é requisito, não gosto: o muro aparece no meio de uma matéria e
+ * concorre com a leitura. Ele convida uma vez, no tom do veículo, e para por
+ * aí — nada de tarja fixa, contagem regressiva ou cor gritante.
+ *
+ * Mobile-first; breakpoints literais (480/768/1024/1280), porque custom
+ * properties não funcionam dentro de @media.
+ */
+
+/* =====================================================================
+ * 1. A COLUNA DAS TELAS
+ * =====================================================================
+ * Uma coluna só, estreita e centrada: não há nada para comparar lado a lado
+ * numa tela de cadastro, e um formulário de três campos numa faixa de 1200px
+ * viraria um campo por horizonte. O campo tem 420px a partir de 480px de
+ * tela; abaixo disso ocupa o que sobra do gutter (272px em 320px de largura).
+ *
+ * A medida mora no .si-auth e o empilhamento no .si-auth__caixa: um cuida da
+ * largura da página, o outro do ritmo vertical do conteúdo.
+ */
+
+.si-auth {
+	width: 100%;
+	/* 420px de campo + o gutter dos dois lados, como na paginação do arquivo. */
+	max-width: calc(420px + 2 * var(--si-container-gutter));
+	margin-inline: auto;
+	/* Respiro generoso: a tela é curta e precisa de ar entre cabeçalho e rodapé. */
+	padding-block: clamp(var(--si-space-12), 9vw, var(--si-space-24));
+	padding-inline: var(--si-container-gutter);
+}
+
+.si-auth__caixa {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-6);
+}
+
+/*
+ * O título é o da página (the_title), então a escala é a de um título de
+ * matéria, e não a do h1 da home: 32px de teto em vez de 48px, que numa
+ * coluna de 420px quebraria "Criar meu cadastro" em três linhas.
+ */
+.si-auth__titulo {
+	font-size: var(--si-font-size-h2);
+	font-weight: var(--si-font-weight-h2);
+	line-height: var(--si-line-height-h2);
+	letter-spacing: var(--si-letter-spacing-h2);
+	text-wrap: balance;
+}
+
+/*
+ * Subtítulo das telas de senha, que dividem a página de entrada e não têm
+ * página própria — um degrau abaixo do h1, sem competir com ele.
+ */
+.si-auth__subtitulo {
+	font-size: var(--si-font-size-h4);
+	font-weight: var(--si-font-weight-h4);
+	line-height: var(--si-line-height-h4);
+	letter-spacing: var(--si-letter-spacing-h4);
+	text-wrap: balance;
+}
+
+/* Texto de apoio: vem do the_content da página, então pode ter vários parágrafos. */
+.si-auth__apoio {
+	color: var(--si-color-text-secondary);
+	font-size: var(--si-font-size-body);
+	line-height: var(--si-line-height-body);
+}
+
+.si-auth__apoio > * + * {
+	margin-top: var(--si-space-4);
+}
+
+/* =====================================================================
+ * 2. CAMPOS
+ * =====================================================================
+ * Rótulo sempre visível, acima do campo. Placeholder como rótulo desaparece
+ * ao digitar e some para quem usa leitor de tela — num formulário de senha
+ * isso custa caro.
+ */
+
+.si-auth__form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-5);
+	/* Um degrau a mais de ar antes do primeiro campo, sem inflar todo o gap da caixa. */
+	margin-top: var(--si-space-2);
+}
+
+.si-auth__campo {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-2);
+}
+
+/* O rótulo usa a tipografia de label do portal — a mesma dos chapéus. */
+.si-auth__rotulo {
+	color: var(--si-color-text-tertiary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+}
+
+/*
+ * Fio discreto em volta do campo, sem raio e sem sombra: o portal não
+ * arredonda nada (a única exceção é o marcador redondo dos itens de lista).
+ *
+ * O appearance: none é o que faz o iOS respeitar borda e fundo — sem ele o
+ * Safari desenha o campo com o cromo do sistema por cima. O corpo é o do
+ * texto de leitura (17px), acima dos 16px em que o iOS dá zoom automático ao
+ * focar um campo.
+ */
+.si-auth__controle {
+	width: 100%;
+	/* Alvo de toque mínimo; só o padding ficaria abaixo dos 44px. */
+	min-height: 44px;
+	padding: var(--si-space-3);
+	border: 1px solid var(--si-color-border-default);
+	border-radius: 0;
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: var(--si-color-surface-page);
+	color: var(--si-color-text-primary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-body);
+	line-height: var(--si-line-height-nav);
+}
+
+/*
+ * No foco o fio ganha a cor da marca. É reforço, não substituto: o anel de
+ * :focus-visible declarado no main.css continua valendo (nada de
+ * outline: none aqui), porque trocar só a cor da borda deixaria de fora quem
+ * não distingue cinza de vinho.
+ */
+.si-auth__controle:focus {
+	border-color: var(--si-color-border-brand);
+}
+
+/* Firefox entrega o placeholder esmaecido; o opacity: 1 devolve o tom do token. */
+.si-auth__controle::placeholder {
+	color: var(--si-color-text-tertiary);
+	opacity: 1;
+}
+
+/*
+ * :user-invalid só marca depois que a pessoa mexeu no campo — o :invalid puro
+ * pintaria de vermelho um formulário ainda em branco, já que todos são
+ * required. Navegador que não conhece o seletor ignora a regra e fica com o
+ * fio neutro.
+ */
+.si-auth__controle:user-invalid {
+	border-color: var(--si-color-state-error);
+}
+
+/* Dica sob o campo (o mínimo de 8 caracteres da senha). */
+.si-auth__dica {
+	color: var(--si-color-text-tertiary);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+/*
+ * Aceite da newsletter. Caixa e rótulo na mesma linha, alinhados pelo topo —
+ * o texto tem duas linhas em telas estreitas e o centro deixaria a caixa
+ * boiando no meio da frase.
+ */
+.si-auth__aceite {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--si-space-3);
+	color: var(--si-color-text-secondary);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+/* A caixa nativa é pequena demais para o dedo; o rótulo ao lado completa o alvo. */
+.si-auth__aceite input {
+	flex: 0 0 auto;
+	width: 20px;
+	height: 20px;
+	/* Alinha com a primeira linha do texto, que é menor que o corpo padrão. */
+	margin-top: 1px;
+	accent-color: var(--si-color-brand-primary);
+}
+
+/*
+ * Armadilha para robô de formulário.
+ *
+ * ⚠️ `display: none` não serve: parte dos robôs pula campo escondido, e é
+ * justamente ele que deve ser preenchido. Tirar da tela pelo posicionamento
+ * mantém o campo "visível" para quem lê o HTML e invisível para quem lê a
+ * página. `aria-hidden` e `tabindex="-1"` no markup cuidam do resto.
+ */
+.si-auth__isca {
+	position: absolute;
+	left: -9999px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+/* =====================================================================
+ * 3. BOTÕES
+ * =====================================================================
+ * Um só desenho para as duas frentes: enviar o formulário e aceitar o convite
+ * do muro são a mesma ação editorial ("entrar no portal"), e desenhá-las
+ * diferente faria o leitor achar que são coisas distintas.
+ */
+
+.si-auth__botao,
+.si-exclusiva__botao,
+.si-auth__link--sair {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--si-space-2);
+	max-width: 100%;
+	/* 44px de alvo de toque, com folga para o texto respirar. */
+	min-height: 44px;
+	padding: var(--si-space-3) var(--si-space-6);
+	border: 1px solid var(--si-color-brand-primary);
+	border-radius: 0;
+	background-color: var(--si-color-brand-primary);
+	color: var(--si-color-brand-on-primary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-ui-sm);
+	font-weight: var(--si-font-weight-semibold);
+	line-height: var(--si-line-height-nav);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-align: center;
+	text-transform: var(--si-text-transform-label);
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.si-auth__botao:hover,
+.si-exclusiva__botao:hover,
+.si-auth__botao:focus-visible,
+.si-exclusiva__botao:focus-visible {
+	border-color: var(--si-color-brand-primary-hover);
+	background-color: var(--si-color-brand-primary-hover);
+	color: var(--si-color-brand-on-primary);
+}
+
+/* No formulário o botão ocupa a coluna inteira: é a única saída da tela. */
+.si-auth__form .si-auth__botao {
+	width: 100%;
+}
+
+/*
+ * Sair é a mesma caixa sem preenchimento: continua sendo um botão, mas não
+ * disputa atenção com nada — é a ação que se procura, não a que se oferece.
+ */
+.si-auth__link--sair {
+	border-color: var(--si-color-border-strong);
+	background-color: transparent;
+	color: var(--si-color-text-primary);
+}
+
+.si-auth__link--sair:hover,
+.si-auth__link--sair:focus-visible {
+	border-color: var(--si-color-border-strong);
+	background-color: var(--si-color-surface-subtle);
+	color: var(--si-color-text-primary);
+}
+
+/* =====================================================================
+ * 4. RECADOS
+ * =====================================================================
+ * Mesmo desenho dos avisos da home (.si-hero__aviso): fio de 4px à esquerda
+ * sobre fundo claro. Discreto de propósito — é a resposta a uma ação que a
+ * pessoa acabou de fazer, não um alarme.
+ *
+ * A cor do fio é o único traço que separa erro de confirmação, e cor sozinha
+ * não comunica: quem carrega a informação é o texto vindo de si_recado(), e o
+ * papel ARIA (alert/status) já diferencia os dois para o leitor de tela.
+ */
+
+.si-auth__recado {
+	padding: var(--si-space-3) var(--si-space-4);
+	border-left: 4px solid var(--si-color-border-default);
+	background-color: var(--si-color-surface-subtle);
+	color: var(--si-color-text-secondary);
+	font-size: var(--si-font-size-ui-md);
+	line-height: var(--si-line-height-nav);
+}
+
+.si-auth__recado--erro {
+	border-left-color: var(--si-color-state-error);
+}
+
+.si-auth__recado--ok {
+	border-left-color: var(--si-color-state-success);
+}
+
+/* =====================================================================
+ * 5. TRAVESSIA ENTRE AS TELAS
+ * =====================================================================
+ * "Esqueci minha senha", "já tem cadastro?", "voltar para a entrada". Ficam
+ * abaixo do formulário, separadas dele por um fio, e no corpo do texto de
+ * leitura — são frases, não rótulos de interface.
+ */
+
+.si-auth__ajuda,
+.si-auth__alterna {
+	color: var(--si-color-text-tertiary);
+	font-size: var(--si-font-size-body);
+	line-height: var(--si-line-height-body);
+}
+
+/*
+ * O fio sai só na primeira linha depois do formulário. A tela de entrada tem
+ * duas seguidas ("esqueci minha senha" e "ainda não tem cadastro?"), e um fio
+ * em cada uma picotaria o pé da caixa.
+ */
+.si-auth__form + .si-auth__ajuda,
+.si-auth__form + .si-auth__alterna {
+	padding-top: var(--si-space-6);
+	border-top: 1px solid var(--si-color-border-subtle);
+}
+
+/*
+ * Alvo de toque sem quebrar a frase: padding vertical em elemento inline
+ * amplia a área clicável sem alterar a altura da linha, e "Já tem cadastro?
+ * Entrar" precisa continuar sendo uma frase, não um botão no meio do texto.
+ *
+ * A conta é sobre a caixa de conteúdo do inline (≈20px no corpo de 17px), e
+ * não sobre a entrelinha: 12 + 20 + 12 = 44px, medidos no navegador. O de
+ * sair fica de fora — lá o alvo já é a caixa inteira do botão.
+ */
+.si-auth__link:not(.si-auth__link--sair) {
+	padding-block: var(--si-space-3);
+	font-weight: var(--si-font-weight-medium);
+}
+
+/* =====================================================================
+ * 6. PÁGINA DE CONTA
+ * =====================================================================
+ * Os dados do assinante em linhas separadas por fio, no mesmo desenho das
+ * listas do portal: rótulo em label, valor em corpo.
+ */
+
+.si-auth__dados {
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+}
+
+.si-auth__dado {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--si-space-1) var(--si-space-4);
+	align-items: baseline;
+	justify-content: space-between;
+	padding-block: var(--si-space-3);
+	border-top: 1px solid var(--si-color-border-subtle);
+}
+
+/* Fecha a lista embaixo, como o fio que fecha os blocos da home. */
+.si-auth__dado:last-child {
+	border-bottom: 1px solid var(--si-color-border-subtle);
+}
+
+.si-auth__dado-rotulo {
+	color: var(--si-color-text-tertiary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+}
+
+/* O e-mail é a string mais longa da tela e não pode empurrar a coluna. */
+.si-auth__dado-valor {
+	font-size: var(--si-font-size-body);
+	line-height: var(--si-line-height-nav);
+	overflow-wrap: anywhere;
+}
+
+/* =====================================================================
+ * 7. MURO DA MATÉRIA EXCLUSIVA
+ * =====================================================================
+ * O corte é o momento mais delicado da página: se o texto simplesmente parar
+ * no meio de uma frase, parece defeito de publicação. O degradê nasce
+ * transparente sobre o último parágrafo livre e termina no fundo da página,
+ * então a leitura se apaga em vez de ser interrompida — e fica evidente que
+ * há mais texto ali.
+ */
+
+.si-exclusiva {
+	position: relative;
+	/*
+	 * O muro fecha o trecho livre: nada pode ficar ao lado dele. Sem o clear,
+	 * a caixa Recomendadas que o single.php faz flutuar à direita empurraria
+	 * o convite para uma coluna de 576px, desalinhado do degradê, que ocupa
+	 * os 792px da coluna de leitura.
+	 */
+	clear: both;
+	/*
+	 * Altura do apagamento. Fluida em vez de escalonada por media query: o
+	 * degradê acompanha a altura do bloco de texto que ele cobre.
+	 */
+	--si-muro-fade: clamp(96px, 18vw, 176px);
+}
+
+/*
+ * O degradê é puxado para cima, para fora do muro: ele pertence ao texto
+ * livre, não ao trecho restrito (por isso o markup o deixa fora de
+ * .si-exclusiva__corpo). Absoluto para não ocupar altura própria — o convite
+ * começa exatamente onde o muro começa.
+ */
+.si-exclusiva__degrade {
+	position: absolute;
+	top: calc(-1 * var(--si-muro-fade));
+	right: 0;
+	left: 0;
+	height: var(--si-muro-fade);
+	/*
+	 * O topo é o próprio fundo da página com alfa zero, e não a palavra-chave
+	 * transparent: transparent é preto transparente, e navegador que não
+	 * interpole com alfa pré-multiplicado passaria pelo cinza no meio do
+	 * caminho — a "faixa suja" clássica de degradê para transparente.
+	 */
+	background-image: linear-gradient(
+		to bottom,
+		color-mix(in srgb, var(--si-color-surface-page), transparent 100%) 0%,
+		var(--si-color-surface-page) 100%
+	);
+	/* Pintura, não conteúdo: o clique e a seleção atravessam para o texto. */
+	pointer-events: none;
+}
+
+/*
+ * O convite. Fundo levemente destacado da página para não ser lido como
+ * continuação da matéria, e nenhuma borda em volta — quem delimita é o
+ * próprio tom, como nas faixas editoriais do portal.
+ */
+.si-exclusiva__corpo {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--si-space-4);
+	padding: var(--si-space-12) var(--si-space-6);
+	background-color: var(--si-color-surface-subtle);
+	text-align: center;
+}
+
+/*
+ * Vinheta da marca no alto do bloco: um fio curto, que não encosta nas
+ * bordas — o mesmo recurso dos fios interrompidos do layout, reduzido à
+ * escala de um selo.
+ */
+.si-exclusiva__corpo::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 50%;
+	width: 48px;
+	height: 2px;
+	background-color: var(--si-color-brand-primary);
+	transform: translateX(-50%);
+}
+
+.si-exclusiva__chapeu {
+	color: var(--si-color-brand-primary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+}
+
+/* Medidas curtas: o convite se lê de um golpe de vista, não se estuda. */
+.si-exclusiva__titulo {
+	max-width: 24ch;
+	font-size: var(--si-font-size-h4);
+	font-weight: var(--si-font-weight-h4);
+	line-height: var(--si-line-height-h4);
+	letter-spacing: var(--si-letter-spacing-h4);
+	text-wrap: balance;
+}
+
+.si-exclusiva__texto {
+	max-width: 46ch;
+	color: var(--si-color-text-secondary);
+	font-size: var(--si-font-size-body);
+	line-height: var(--si-line-height-body);
+}
+
+/* Um degrau a mais de ar antes da ação, para ela não colar no texto. */
+.si-exclusiva__botao {
+	margin-top: var(--si-space-2);
+}
+
+/* "Já tenho cadastro": saída secundária, em texto, sem competir com o botão. */
+.si-exclusiva__entrada {
+	color: var(--si-color-text-tertiary);
+	font-size: var(--si-font-size-nav);
+	line-height: var(--si-line-height-nav);
+}
+
+/*
+ * Aqui o link é o parágrafo inteiro, então virar caixa não parte frase
+ * nenhuma — e no corpo de 13px o padding do rodapé das telas não chegaria aos
+ * 44px de alvo mínimo.
+ */
+.si-exclusiva__link {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding-inline: var(--si-space-2);
+	font-weight: var(--si-font-weight-medium);
+}
+
+/*
+ * Aviso de configuração pendente: só chega a quem pode editar. Fundo branco
+ * para se destacar do fundo claro do convite, e alinhado à esquerda porque é
+ * texto de instrução, não chamada.
+ */
+.si-exclusiva__aviso {
+	width: 100%;
+	margin-top: var(--si-space-2);
+	padding: var(--si-space-4);
+	border-left: 4px solid var(--si-color-state-warning);
+	background-color: var(--si-color-surface-page);
+	color: var(--si-color-text-secondary);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+	text-align: left;
+}
+
+/* =====================================================================
+ * 8. RESPONSIVO
+ * =====================================================================
+ * Só o que a coluna estreita realmente pede. A largura do campo já é fluida
+ * até 468px e o degradê é fluido por clamp(), então nenhum dos dois precisa
+ * de breakpoint — o que muda com a tela é o respiro interno do muro.
+ */
+
+@media (min-width: 480px) {
+	.si-exclusiva__corpo {
+		padding-inline: var(--si-space-8);
+	}
+}
+
+@media (min-width: 768px) {
+	.si-exclusiva__corpo {
+		padding: var(--si-space-16) var(--si-space-12);
+	}
+
+	/* Na conta, rótulo e valor cabem na mesma linha com folga. */
+	.si-auth__dado {
+		flex-wrap: nowrap;
+		gap: var(--si-space-6);
+	}
+}

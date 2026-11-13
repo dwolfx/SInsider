@@ -1,0 +1,389 @@
+.playground {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--si-color-neutral-100, #f1f5f9);
+  font-family: var(--si-font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  color: var(--si-color-neutral-800, #1e293b);
+  overflow: hidden;
+  position: relative;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--si-color-neutral-200, #e2e8f0);
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoBadge {
+  background-color: var(--si-color-primary, #0066cc);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: var(--si-radius-sm, 4px);
+  letter-spacing: 0.5px;
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--si-color-neutral-900, #0f172a);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.presetButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--si-radius-md, 8px);
+  border: 1px solid var(--si-color-neutral-300, #cbd5e1);
+  background-color: #ffffff;
+  color: var(--si-color-neutral-800, #1e293b);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.presetIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.presetButton:hover {
+  background-color: var(--si-color-neutral-50, #f8fafc);
+  border-color: var(--si-color-neutral-400, #94a3b8);
+}
+
+.mainContent {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.editorArea {
+  flex: 1;
+  padding: 16px 24px;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border: 1px solid var(--si-color-neutral-200, #e2e8f0);
+  border-radius: var(--si-radius-md, 8px);
+  padding: 18px 20px;
+  box-shadow: var(--si-shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.fieldGroup {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.contentFieldGroup {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+  gap: 6px;
+}
+
+.fieldHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--si-color-neutral-800, #1e293b);
+}
+
+.viewTabs {
+  display: flex;
+  gap: 4px;
+  background: var(--si-color-neutral-100, #f1f5f9);
+  padding: 2px;
+  border-radius: 4px;
+}
+
+.viewTabButton {
+  border: none;
+  background: transparent;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--si-color-neutral-600, #64748b);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s ease;
+}
+
+.viewTabButtonActive {
+  background: #ffffff;
+  color: var(--si-color-neutral-900, #0f172a);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.highlightBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  background-color: #fef08a;
+  color: #854d0e;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  border: 1px solid #facc15;
+}
+
+.clearHighlightBtn {
+  background: transparent;
+  border: none;
+  color: #854d0e;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.clearHighlightBtn:hover {
+  color: #000000;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  border: 1px solid var(--si-color-neutral-300, #cbd5e1);
+  border-radius: var(--si-radius-sm, 4px);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+
+.input:focus {
+  border-color: var(--si-color-primary, #0066cc);
+}
+
+/* Container do editor com Backdrop Sincronizado em Tempo Real e Altura Fixa */
+.editorContainer {
+  position: relative;
+  display: grid;
+  grid-template-areas: "editor";
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  border-radius: var(--si-radius-sm, 4px);
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.editorBackdrop {
+  grid-area: editor;
+  pointer-events: none;
+  overflow: hidden;
+  height: 100%;
+  padding: 12px 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: transparent;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+.editorTextarea {
+  grid-area: editor;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 12px 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  background-color: transparent;
+  color: var(--si-color-neutral-900, #0f172a);
+  border: 1px solid var(--si-color-neutral-300, #cbd5e1);
+  border-radius: var(--si-radius-sm, 4px);
+  outline: none;
+  box-sizing: border-box;
+  resize: none;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  caret-color: #0f172a;
+  transition: border-color 0.15s ease;
+}
+
+.editorTextarea:focus {
+  border-color: var(--si-color-primary, #0066cc);
+}
+
+.keywordMark {
+  background-color: #fef08a;
+  color: transparent;
+  padding: 2px 0;
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px #facc15;
+}
+
+/* Painel Overlay Flutuante (Drawer) */
+.floatingDrawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--si-color-neutral-50, #f8fafc);
+  box-shadow: -4px 0 24px rgba(15, 23, 42, 0.15);
+  border-left: 1px solid var(--si-color-neutral-200, #e2e8f0);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floatingDrawerOpen {
+  transform: translateX(0);
+}
+
+.floatingDrawerClosed {
+  transform: translateX(100%);
+}
+
+.drawerInner {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  background-color: var(--si-color-neutral-50, #f8fafc);
+}
+
+/* Barra de redimensionamento na borda esquerda do Drawer */
+.resizerHandle {
+  position: absolute;
+  top: 0;
+  left: -4px;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 60;
+  transition: background-color 0.15s ease;
+}
+
+.resizerHandle:hover,
+.resizerActive {
+  background-color: var(--si-color-primary, #0066cc);
+}
+
+/* Seta Sticky perto do Topo */
+.stickyArrowOpen {
+  position: absolute;
+  top: 24px;
+  left: -26px;
+  width: 26px;
+  height: 48px;
+  background-color: #ffffff;
+  border: 1px solid var(--si-color-neutral-300, #cbd5e1);
+  border-right: none;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+  box-shadow: -3px 0 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 70;
+  color: var(--si-color-neutral-600, #475569);
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.stickyArrowOpen:hover {
+  background-color: var(--si-color-primary, #0066cc);
+  color: #ffffff;
+  border-color: var(--si-color-primary, #0066cc);
+  width: 28px;
+  left: -28px;
+}
+
+/* Seta Sticky quando o painel está fechado */
+.stickyArrowClosed {
+  position: absolute;
+  top: 24px;
+  right: 0;
+  width: 28px;
+  height: 52px;
+  background-color: #ffffff;
+  border: 1px solid var(--si-color-neutral-300, #cbd5e1);
+  border-right: none;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+  box-shadow: -3px 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 70;
+  color: var(--si-color-primary, #0066cc);
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.stickyArrowClosed:hover {
+  background-color: var(--si-color-primary, #0066cc);
+  color: #ffffff;
+  width: 32px;
+}
+
+.arrowIcon {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}

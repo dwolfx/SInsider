@@ -1,0 +1,188 @@
+/**
+ * Saúde Insider — rodapé.
+ *
+ * Faixa escura em todas as páginas, com três blocos empilhados: marca, linha
+ * de links com o aviso de direitos, e redes sociais. No frame os três ficam
+ * um sob o outro com 48px entre eles, em qualquer largura — não há arranjo
+ * lateral para desfazer no mobile.
+ *
+ * Breakpoints repetidos literalmente (480, 768, 1024, 1280): custom properties
+ * não funcionam dentro de @media.
+ */
+
+.si-footer {
+	background-color: var(--si-color-surface-inverse);
+	color: var(--si-color-text-inverse);
+}
+
+.si-footer__inner {
+	display: flex;
+	/* Os três blocos são centralizados no frame, em qualquer largura. */
+	align-items: center;
+	flex-direction: column;
+	gap: var(--si-space-12);
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	/* 48px em cima e embaixo; nas laterais o mesmo recuo das faixas de anúncio. */
+	padding: var(--si-space-12) var(--si-container-gutter);
+}
+
+/* --- Marca --- */
+
+.si-footer__marca {
+	font-family: var(--si-font-serif);
+	/* 32px no frame — é o topo do clamp de h2. */
+	font-size: var(--si-font-size-h2);
+	font-weight: var(--si-font-weight-regular);
+	line-height: var(--si-line-height-h2);
+	/*
+	 * O frame escreve a marca em caixa alta. A transformação fica no CSS para
+	 * o nome do site seguir valendo como está em Configurações › Geral, sem
+	 * obrigar quem edita a digitar em maiúsculas.
+	 */
+	text-transform: uppercase;
+}
+
+.si-footer__marca-link {
+	color: inherit;
+	text-decoration: none;
+}
+
+/*
+ * ⚠️ Mesmo caso do cartão de destaque: sem o `color: inherit` a regra global
+ * `a:hover` pinta a marca de vinho fechado sobre o preto do rodapé — **1,47:1**,
+ * medido em 02/09/2026. Os demais links do rodapé já tinham regra própria; esta
+ * marca era a que faltava.
+ */
+.si-footer__marca-link:hover,
+.si-footer__marca-link:focus-visible {
+	color: inherit;
+	text-decoration: underline;
+}
+
+/* --- Linha de links --- */
+
+/*
+ * Aviso de direitos e links na mesma linha, com o mesmo respiro entre todos.
+ * Quebra em várias linhas quando não couber, sem media query.
+ */
+.si-footer__linha {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: center;
+	gap: var(--si-space-2);
+}
+
+.si-footer__copyright,
+.si-footer__links a {
+	/* Mesmo recuo interno dos itens do frame, que também dá área de clique. */
+	padding: var(--si-space-1) var(--si-space-2);
+}
+
+.si-footer__copyright {
+	color: var(--si-color-text-tertiary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+.si-footer__links {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--si-space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/*
+ * Alvo de toque de 44px na base (mobile-first); a partir de 768px volta à
+ * altura visual do frame — mesmo arranjo dos ícones de rede logo abaixo.
+ */
+.si-footer__links a {
+	display: inline-flex;
+	align-items: center;
+	min-height: var(--si-space-11);
+	color: var(--si-color-text-inverse);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-nav);
+	line-height: var(--si-line-height-nav);
+	text-decoration: none;
+}
+
+@media (min-width: 768px) {
+	.si-footer__links a {
+		min-height: 0;
+	}
+}
+
+.si-footer__links a:hover {
+	text-decoration: underline;
+}
+
+/* --- Redes sociais --- */
+
+.si-footer__redes {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--si-space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.si-footer__rede {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/*
+	 * ⚠️ O último item da fila é um <button> (copiar link), e não uma âncora —
+	 * ele não vai a lugar nenhum, executa uma ação. Sem estas três linhas o
+	 * navegador o desenha com fundo e moldura próprios, e ele aparecia como uma
+	 * caixa branca no meio dos ícones. Visto em imagem, 25/08/2026.
+	 */
+	padding: 0;
+	border: 0;
+	background: none;
+	/*
+	 * 28px é a medida do frame. Em telas de toque o alvo sobe para 44px pelo
+	 * mínimo de acessibilidade — acessibilidade vence fidelidade.
+	 */
+	width: var(--si-space-11);
+	height: var(--si-space-11);
+	color: var(--si-color-icon-muted);
+}
+
+.si-footer__rede:hover {
+	color: var(--si-color-text-inverse);
+}
+
+.si-footer__rede .si-icon {
+	display: block;
+	width: 13px;
+	height: 13px;
+}
+
+/*
+ * Os SVGs saem do Figma com o traço fixo. currentColor devolve o controle ao
+ * CSS, que pinta pelo token e pelo estado de hover.
+ */
+.si-footer__rede .si-icon path {
+	stroke: currentColor;
+}
+
+@media (min-width: 768px) {
+	.si-footer__inner {
+		/* 8px do wrapper mais 24px do container interno, como nas faixas. */
+		padding-inline: var(--si-space-8);
+	}
+
+	/* Fora do toque o ícone volta aos 28px do frame. */
+	.si-footer__rede {
+		width: var(--si-space-7);
+		height: var(--si-space-7);
+	}
+}

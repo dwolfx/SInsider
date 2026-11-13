@@ -1,0 +1,1191 @@
+/**
+ * Saúde Insider — cabeçalho.
+ *
+ * Mobile-first: a base atende telas pequenas, onde as navegações vivem no
+ * drawer lateral. As media queries acrescentam a partir daí — a navegação de
+ * editorias aparece inline em 1024px e a de seções em 1280px, quando o
+ * cabeçalho passa a bater com o Figma.
+ *
+ * Breakpoints repetidos literalmente (480, 768, 1024, 1280): custom properties
+ * não funcionam dentro de @media.
+ *
+ * ⚠️ As alturas do cabeçalho são ENTRADAS declaradas uma única vez em
+ * `.si-header` (altura da marca, respiro em volta dela, altura da barra e o fio
+ * inferior). Tudo o que depende delas — o quanto o logo avança sobre o que vem
+ * abaixo, a folga do painel de busca e a reserva do próprio cabeçalho — é
+ * CALCULADO a partir delas. As media queries daqui para baixo trocam entradas,
+ * nunca resultados. Ao mexer na altura do logo, mexa só em
+ * `--si-header-logo-height`: o resto se ajusta sozinho.
+ */
+
+/* =====================================================================
+ * 1. ESTRUTURA
+ * ===================================================================== */
+
+.si-header {
+	position: relative;
+
+	/*
+	 * ENTRADAS — as quatro medidas do cabeçalho, num lugar só.
+	 *
+	 * São os únicos números editados à mão. As media queries lá embaixo
+	 * trocam ENTRADAS, nunca resultados.
+	 */
+	--si-header-logo-height: 40px;   /* altura da marca dentro da caixa do logo */
+	--si-header-logo-pad: 0px;       /* respiro branco em volta da marca */
+	--si-header-bar-height: 56px;    /* min-height da linha da barra */
+	--si-header-bar-rule: 1px;       /* fio inferior da barra */
+
+	/*
+	 * DERIVADO — quanto a caixa do logo passa da barra, isto é, o quanto ela
+	 * avança sobre o que vier abaixo.
+	 *
+	 * ⚠️ Isto já foi um `53px` chumbado, e o número era uma bomba-relógio: o
+	 * logo vetorizado ainda é entrega pendente do cliente, e uma marca de
+	 * 134px — 9px a mais que a de hoje — já bastava para cobrir o que vinha
+	 * abaixo, em silêncio, sem nada no CSS avisando. Medido em 12/08/2026. Agora a folga é consequência
+	 * das entradas: trocar a altura da marca num lugar propaga para a busca e
+	 * para a reserva do cabeçalho.
+	 *
+	 * O max(0px, …) segura o caso da marca menor que a barra, em que a conta
+	 * daria negativo e puxaria o conteúdo para cima do fio.
+	 */
+	--si-header-logo-overhang: max(0px, calc(
+		var(--si-header-logo-height) + 2 * var(--si-header-logo-pad)
+		- var(--si-header-bar-height) - var(--si-header-bar-rule)
+	));
+
+	/*
+	 * QUEM PAGA A FOLGA. O avanço do logo é absorvido pelo próprio cabeçalho,
+	 * em qualquer largura.
+	 *
+	 * Já houve aqui uma exceção para a faixa de subeditorias, que quando
+	 * visível pagava a folga no lugar dele. A faixa saiu em 17/08/2026 — não
+	 * existe em frame nenhum do Figma (H-14), e com ela a manchete começava
+	 * 37,5px abaixo do previsto. Sem a exceção há um pagador só, e a conta
+	 * volta a ser a mesma nas duas pontas.
+	 */
+	--si-header-reserve: var(--si-header-logo-overhang);
+	--si-header-search-offset: var(--si-header-logo-overhang);
+
+	/* Fio da marca no topo, largura total. */
+	border-top: 2px solid var(--si-color-border-brand);
+	background-color: var(--si-color-surface-page);
+	/* Reserva o avanço do logo. Calcula zero onde o logo não avança. */
+	padding-bottom: var(--si-header-reserve);
+}
+
+.si-header__bar {
+	/*
+	 * Bloco de contenção do logo e do monograma, que saem do fluxo no desktop.
+	 *
+	 * ⚠️ Precisa ser a BARRA, não o `.si-header`: o cabeçalho cresce quando o
+	 * painel de busca abre, e as apresentações internas centram a marca com
+	 * `top: 50%`. Ancoradas no cabeçalho, elas desceriam junto com o painel.
+	 * Para a home, que usa `top: 0`, os dois dão no mesmo ponto.
+	 */
+	position: relative;
+	border-bottom: var(--si-header-bar-rule) solid var(--si-color-border-default);
+}
+
+/*
+ * Container central, compartilhado pela barra e pelo painel de busca.
+ *
+ * Grid de três colunas com as laterais em 1fr: o logo fica no centro óptico
+ * da página independentemente da largura dos grupos ao lado. As colunas são
+ * atribuídas explicitamente para que tirar um item do fluxo (o logo, no
+ * desktop) não desloque os outros.
+ */
+.si-header__inner {
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
+	gap: var(--si-space-2);
+	width: 100%;
+	max-width: var(--si-container-max);
+	min-height: var(--si-header-bar-height);
+	margin-inline: auto;
+	padding-inline: var(--si-container-gutter);
+}
+
+.si-header__side {
+	display: flex;
+	align-items: center;
+	gap: var(--si-space-3);
+	/* Permite encolher abaixo da largura do conteúdo. */
+	min-width: 0;
+}
+
+.si-header__side--start {
+	grid-column: 1;
+}
+
+/* Some no mobile: as seções ficam no drawer. */
+.si-header__side--end {
+	display: none;
+	grid-column: 3;
+	justify-self: end;
+}
+
+/* =====================================================================
+ * 2. BOTÕES E ÍCONES
+ * ===================================================================== */
+
+/*
+ * A caixa visual é a do ícone (17px o menu, 15px a busca, como no frame —
+ * nós 114:324/329); o alvo de toque de 44px vem do pseudo-elemento, no mesmo
+ * padrão do botão de áudio. A caixa de 44px que ficava aqui empurrava todo o
+ * grupo esquerdo do header 56px para a direita do Figma.
+ */
+.si-header__button {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--si-color-icon-default);
+	cursor: pointer;
+}
+
+.si-header__button::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: var(--si-space-11);
+	height: var(--si-space-11);
+	transform: translate(-50%, -50%);
+}
+
+.si-header__button:hover {
+	color: var(--si-color-icon-active);
+}
+
+/* Fio vertical entre os botões e a navegação. */
+.si-header__divider {
+	display: none;
+	width: 1px;
+	height: 20px;
+	margin-inline: var(--si-space-1);
+	background-color: var(--si-color-border-default);
+}
+
+/* =====================================================================
+ * 3. LOGO
+ * ===================================================================== */
+
+.si-header__logo {
+	display: flex;
+	grid-column: 2;
+	justify-content: center;
+	min-width: 0;
+	/*
+	 * Zero até o desktop. Fica aqui, e não só no bloco de 1280, porque é
+	 * operando da conta do avanço: precisa existir como variável em toda
+	 * largura para a fórmula fechar.
+	 */
+	padding: var(--si-header-logo-pad);
+}
+
+.si-header__logo :is(img, .si-logo__fallback) {
+	display: block;
+}
+
+/* O logo tem 40px de altura; o alvo de toque completa os 44px mínimos. */
+.si-header__logo a {
+	position: relative;
+}
+
+.si-header__logo a::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: max(100%, var(--si-space-11));
+	height: var(--si-space-11);
+	transform: translate(-50%, -50%);
+}
+
+/*
+ * Altura fixa em vez de max-height: com width auto, a largura passa a ser
+ * derivada da proporção de forma previsível. O object-fit protege o caso em
+ * que max-width entra em ação numa tela muito estreita.
+ */
+.si-header__logo img {
+	width: auto;
+	height: var(--si-header-logo-height);
+	max-width: 100%;
+	object-fit: contain;
+}
+
+/*
+ * ---------------------------------------------------------------------
+ * 3.1 RECORTE DA MARCA (assinatura e monograma)
+ * ---------------------------------------------------------------------
+ *
+ * ⚠️ **As três marcas do Figma são o MESMO bitmap.** Os quatro nós de logo
+ * (home 173×125, matéria 77×56, assinatura 147×24, monograma 48×35) apontam
+ * para o `imageRef` `642de156…`. O designer recortou, não desenhou.
+ *
+ * Por isso o recorte é feito AQUI, sobre o custom-logo, em vez de virar dois
+ * arquivos em assets/img/: a marca continua editável num lugar só, e a redação
+ * não precisa subir três imagens para o cabeçalho funcionar.
+ *
+ * Os percentuais saem do `imageTransform` de cada nó — [[sx,0,tx],[0,sy,ty]]
+ * descreve a janela em coordenadas normalizadas da imagem, e daí:
+ *     largura = 1/sx · altura = 1/sy · esquerda = −tx/sx · topo = −ty/sy
+ *
+ * ⚠️ **O recorte é calibrado para o logo ATUAL** (519×375, monograma em cima e
+ * assinatura embaixo). Se a marca for trocada por outra de composição
+ * diferente — o logo vetorizado ainda é entrega pendente do cliente —, estes
+ * quatro percentuais precisam ser recalculados. Ficam como variáveis por isso:
+ * é ajuste de token, não reescrita de regra.
+ */
+
+.si-logo {
+	display: block;
+	position: relative;
+	text-decoration: none;
+}
+
+/*
+ * Sem recorte por padrão. Até 1280px as três apresentações do cabeçalho são a
+ * mesma, e a janela simplesmente mostra a marca inteira.
+ */
+.si-logo__janela {
+	display: block;
+	height: var(--si-header-logo-height);
+}
+
+.si-header__logo .si-logo__fonte {
+	display: block;
+	width: auto;
+	height: 100%;
+	max-width: 100%;
+	object-fit: contain;
+}
+
+/* Fallback textual quando não há custom-logo definido. */
+.si-logo__fallback {
+	font-family: var(--si-font-serif);
+	font-size: var(--si-font-size-h5);
+	font-weight: var(--si-font-weight-h5);
+	line-height: var(--si-line-height-h5);
+	color: var(--si-color-text-primary);
+	text-decoration: none;
+	text-align: center;
+}
+
+/* =====================================================================
+ * 4. NAVEGAÇÃO INLINE
+ * ===================================================================== */
+
+.si-nav {
+	display: none;
+}
+
+.si-nav__list {
+	display: flex;
+	align-items: center;
+	gap: var(--si-space-4);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.si-nav__list a {
+	display: block;
+	/* O cabeçalho usa o corpo de 11px do token de label, sem caixa alta. */
+	font-size: var(--si-font-size-label);
+	line-height: var(--si-line-height-label);
+	color: var(--si-color-text-primary);
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.si-nav__list a:hover {
+	color: var(--si-color-text-link);
+}
+
+/* Editorias: peso e espaçamento do token de navegação. */
+.si-nav--primary .si-nav__list a {
+	font-weight: var(--si-font-weight-nav);
+	letter-spacing: var(--si-letter-spacing-nav);
+}
+
+/*
+ * Editoria corrente, em vinho.
+ *
+ * O frame 122:1731 traz "Regulatório" em #7A0F16 contra o #111111 dos
+ * vizinhos, e o título da página nesse mesmo frame é "Regulatório" (48px,
+ * nó 123:2986) — é estado de item corrente, não realce decorativo. O peso não
+ * muda: 500 nos cinco itens, o realçado inclusive.
+ *
+ * #7A0F16 é o `--si-red-800`, e o comentário do token já previa este uso
+ * ("Logo, vinhetas, tags editoriais, estados ativos, links especiais").
+ *
+ * ⚠️ **Só na navegação de editorias, de propósito.** O frame da Cúpula
+ * (202:1966) é uma listagem como o da Editoria, está na página da Cúpula, e
+ * NÃO realça o "Cúpula" do menu — que vive no grupo de seções. Restringir a
+ * regra ao `--primary` é a única leitura que satisfaz os dois frames ao mesmo
+ * tempo; realçar em todos contradiria o segundo.
+ *
+ * ⚠️ A matéria não realça nada, e isso sai de graça: o WordPress só aplica
+ * `current-menu-item` no arquivo da editoria. Numa matéria dela, a classe é
+ * `current-menu-parent` — que esta regra não alcança, como nos frames
+ * 124:3275 e 127:6225, onde os cinco itens são #111111.
+ */
+.si-nav--primary .si-nav__list .current-menu-item > a {
+	color: var(--si-color-brand-primary);
+}
+
+/* Seções e ações: peso normal, sem tracking. */
+:is(.si-nav--secondary, .si-nav--actions) .si-nav__list a {
+	font-weight: var(--si-font-weight-regular);
+	letter-spacing: var(--si-letter-spacing-body);
+}
+
+.si-nav--secondary .si-nav__list {
+	justify-content: flex-end;
+}
+
+/*
+ * Ações (Login, Assine). Vêm da área de menu "actions", então a separação
+ * é estrutural: não depende de classe CSS aplicada à mão em item de menu.
+ */
+.si-nav--actions {
+	align-items: center;
+	gap: var(--si-space-4);
+}
+
+/* Fio vertical — só quando as seções estão visíveis logo antes.
+ * Respiro de 20px de cada lado, como no frame (nó 114:353): o gap do grupo
+ * entrega 12 antes e 16 depois; as margens completam. */
+.si-nav--secondary + .si-nav--actions::before {
+	content: "";
+	width: 1px;
+	height: 20px;
+	margin-left: var(--si-space-2);
+	margin-right: var(--si-space-1);
+	background-color: var(--si-color-border-default);
+}
+
+/*
+ * O último item da área de ações é a chamada principal — "Assine" no Figma.
+ * Reordenar o menu no wp-admin move o botão junto, que é o esperado.
+ */
+.si-nav--actions .si-nav__list li:last-child a {
+	padding: var(--si-space-2) var(--si-space-3);
+	background-color: var(--si-color-brand-primary);
+	color: var(--si-color-brand-on-primary);
+	font-weight: var(--si-font-weight-label);
+	/* O Figma usa 0.02em aqui; 0.01em do token de nav é o mais próximo
+	 * disponível. O 0.1em do token de label alargaria o botão em ~10px. */
+	letter-spacing: var(--si-letter-spacing-nav);
+}
+
+.si-nav--actions .si-nav__list li:last-child a:hover {
+	background-color: var(--si-color-brand-primary-hover);
+	color: var(--si-color-brand-on-primary);
+}
+
+/* ---------------------------------------------------------------------
+ * 4.1 Submenu do cabeçalho
+ * -------------------------------------------------------------------
+ * Item de menu com filhos vira um painel que abre sob o pai. Até 21/08/2026
+ * as navegações do topo liam profundidade 1, então um subitem cadastrado no
+ * painel simplesmente NÃO aparecia — nem achatado. Agora leem dois níveis, e
+ * o segundo é desenhado aqui.
+ *
+ * Abre no `:hover` E no `:focus-within`: sem o segundo, quem navega por
+ * teclado alcança o link do filho mas nunca o vê — o foco entra num painel
+ * invisível. É a diferença entre funcionar e parecer funcionar.
+ * ------------------------------------------------------------------- */
+
+.si-nav__list > li {
+	position: relative;
+}
+
+.si-nav__list .sub-menu {
+	position: absolute;
+	top: 100%;
+	left: calc(var(--si-space-3) * -1);
+	z-index: 30;
+	display: none;
+	min-width: 190px;
+	margin: 0;
+	padding: var(--si-space-2) 0;
+	border: 1px solid var(--si-color-border-default);
+	background-color: var(--si-color-surface-page);
+	box-shadow: var(--si-shadow-drawer);
+	list-style: none;
+}
+
+.si-nav__list > li:hover > .sub-menu,
+.si-nav__list > li:focus-within > .sub-menu {
+	display: block;
+}
+
+/*
+ * Faixa de tolerância entre o pai e o painel. Sem ela, o pequeno vão que o
+ * padding do item deixa faz o menu fechar quando o ponteiro atravessa —
+ * o clássico "o submenu some antes de eu chegar nele".
+ */
+.si-nav__list > li:has(.sub-menu)::after {
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 0;
+	width: 100%;
+	height: var(--si-space-2);
+}
+
+.si-nav__list .sub-menu a {
+	display: block;
+	padding: var(--si-space-2) var(--si-space-4);
+	color: var(--si-color-text-primary);
+	font-weight: var(--si-font-weight-regular);
+	letter-spacing: var(--si-letter-spacing-body);
+	white-space: nowrap;
+}
+
+.si-nav__list .sub-menu a:hover {
+	background-color: var(--si-color-surface-subtle);
+	color: var(--si-color-text-link);
+}
+
+/* O grupo da direita abre alinhado pela borda oposta, para não escapar da tela. */
+.si-nav--secondary .si-nav__list .sub-menu {
+	right: calc(var(--si-space-3) * -1);
+	left: auto;
+}
+
+/* =====================================================================
+ * 5. PAINEL DE BUSCA
+ * ===================================================================== */
+
+/*
+ * O painel abre no fundo da página, sem caixa cinza: a busca é continuação do
+ * cabeçalho, não um bloco à parte. Só o fio inferior a separa do conteúdo.
+ */
+.si-header__search {
+	border-bottom: 1px solid var(--si-color-border-subtle);
+	background-color: var(--si-color-surface-page);
+}
+
+/*
+ * Coluna única no painel — o grid de três colunas da barra jogava o formulário
+ * na primeira delas, e o campo terminava atrás do logo, que no desktop está
+ * fora do fluxo e centralizado.
+ *
+ * O respiro de cima é o avanço do logo mais o espaçamento normal, então o campo
+ * nasce sempre abaixo da marca — o painel abre logo abaixo da barra, e sem esse
+ * desconto o logo cairia por cima dele.
+ */
+.si-header__search .si-header__inner {
+	display: block;
+	min-height: 0;
+	padding-block: calc(var(--si-header-search-offset) + var(--si-space-4)) var(--si-space-4);
+}
+
+.si-header__search .si-busca {
+	display: flex;
+	gap: var(--si-space-2);
+	width: 100%;
+}
+
+.si-busca__campo {
+	flex: 1;
+	min-height: 44px;
+	padding: var(--si-space-2) var(--si-space-3);
+	border: 1px solid var(--si-color-border-default);
+	background-color: var(--si-color-surface-page);
+	color: var(--si-color-text-primary);
+	font-size: var(--si-font-size-body);
+}
+
+/* Quadrado com a lupa: o verbo saiu do botão e virou nome acessível. */
+.si-busca__enviar {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	min-height: 44px;
+	padding: 0;
+	border: 0;
+	background-color: var(--si-color-brand-primary);
+	color: var(--si-color-brand-on-primary);
+	cursor: pointer;
+}
+
+.si-busca__enviar .si-icon {
+	width: 16px;
+	height: 16px;
+}
+
+.si-busca__enviar:hover {
+	background-color: var(--si-color-brand-primary-hover);
+}
+
+/* =====================================================================
+ * 6. DRAWER
+ * ===================================================================== */
+
+.si-drawer {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+}
+
+.si-drawer__backdrop {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	padding: 0;
+	border: 0;
+	background-color: var(--si-color-overlay-scrim);
+	cursor: pointer;
+}
+
+.si-drawer__panel {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	width: min(340px, 88vw);
+	height: 100%;
+	background-color: var(--si-color-surface-overlay);
+	/* Projeta o painel sobre o scrim, como no frame (nó 403:3177). */
+	box-shadow: var(--si-shadow-drawer);
+	overflow-y: auto;
+}
+
+.si-drawer__top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--si-space-4);
+	padding: var(--si-space-4) var(--si-space-5);
+	border-bottom: 1px solid var(--si-color-border-subtle);
+}
+
+/* Mesmo tratamento do logo da barra: altura fixa, largura pela proporção. */
+.si-drawer__logo img {
+	display: block;
+	width: auto;
+	height: 40px;
+	max-width: 100%;
+	object-fit: contain;
+}
+
+/*
+ * Botão fechar no padrão do .si-header__button: a caixa visual é a do frame
+ * (36x36 com borda, ícone X de 16px — nós 403:3187/3188) e o alvo de toque de
+ * 44px vem do pseudo-elemento. A caixa de 44px que ficava aqui inflava o topo
+ * do drawer de 73 para 77px.
+ */
+.si-drawer__close {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--si-space-9);
+	height: var(--si-space-9);
+	padding: 0;
+	border: 1px solid var(--si-color-border-default);
+	background: none;
+	color: var(--si-color-icon-default);
+	cursor: pointer;
+}
+
+.si-drawer__close::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: var(--si-space-11);
+	height: var(--si-space-11);
+	transform: translate(-50%, -50%);
+}
+
+/* Hover não desenhado no frame: segue o padrão dos botões do header. */
+.si-drawer__close:hover {
+	color: var(--si-color-icon-active);
+}
+
+.si-drawer__search {
+	padding: var(--si-space-4) var(--si-space-5);
+	border-bottom: 1px solid var(--si-color-border-subtle);
+}
+
+.si-drawer__search .si-busca {
+	display: flex;
+	align-items: center;
+	gap: var(--si-space-3);
+}
+
+/*
+ * Variante nua da busca (frame do drawer, nó 403:3192): lupa + placeholder,
+ * sem borda nem botão pintado — o submit segue no DOM com .si-visually-hidden.
+ */
+.si-busca--plain .si-icon {
+	flex: 0 0 auto;
+	/* 14x14 no frame (nó 403:3193); o SVG exportado tem 15. */
+	width: 14px;
+	height: 14px;
+	color: var(--si-color-text-tertiary);
+}
+
+.si-busca--plain .si-busca__campo {
+	min-height: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	font-size: var(--si-font-size-ui-md);
+	line-height: 1.5;
+}
+
+/* #111 a 50% no frame (nó 403:3197); uso único, sem token — padrão
+ * color-mix sobre primitiva já usado em brand-on-primary-strong/soft. */
+.si-busca--plain .si-busca__campo::placeholder {
+	color: color-mix(in srgb, var(--si-gray-900) 50%, transparent);
+	opacity: 1; /* O Firefox aplica opacidade própria ao placeholder. */
+}
+
+/* 24 acima / 16 abaixo, como o container do frame (nó 403:3198). */
+.si-drawer__nav {
+	padding: var(--si-space-6) 0 var(--si-space-4);
+}
+
+/*
+ * Os dois grupos leem como UMA LISTA SÓ.
+ *
+ * ⚠️ Havia aqui `.si-drawer__group + .si-drawer__group { margin-top: 24px }`,
+ * o vão que acompanhava os rótulos "Editorias" e "Seções" do frame 403:3177.
+ * O cliente pediu o menu unificado em 28/08/2026 — sem rótulos e sem divisão —,
+ * e o vão saiu junto: mantê-lo deixaria um buraco no meio da lista, sem nada
+ * que o explicasse. Como `.si-drawer__group` é um <nav>, sem margem própria,
+ * apagar a regra basta; não há o que zerar.
+ *
+ * O fio de cada linha continua vindo de `.si-drawer__list > li`, e a última
+ * linha de cada grupo também tem o seu. Então a emenda entre o último item das
+ * editorias e o primeiro das seções ganha exatamente o mesmo fio de qualquer
+ * outra — é isso que faz as duas listas parecerem uma.
+ */
+
+/* Rótulo do grupo — vem do nome do menu, não de texto fixo.
+ * Corpo de 8.8px do micro-label (nós 403:3200/3218); peso e tracking seguem
+ * os tokens de label — o 700/0.18em do frame está na divergência registrada
+ * de labels (600/0.1em vs 700/0.12–0.18em), pauta da daily.
+ *
+ * ⚠️ SEM USO desde 28/08/2026. Nenhuma chamada de `si_nav_menu()` passa mais o
+ * terceiro argumento, então este markup não é emitido. A regra fica de pé, e o
+ * argumento também, porque voltar atrás é uma palavra — mesma postura da
+ * profundidade do drawer. Se a decisão do cliente se confirmar, some junto. */
+.si-drawer__label {
+	margin-bottom: var(--si-space-2);
+	padding-inline: var(--si-space-5);
+	color: var(--si-color-text-tertiary);
+	font-size: var(--si-font-size-label-xs);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+}
+
+/*
+ * O respiro de 20px fica na LISTA, não no link: o fio inferior de cada linha
+ * nasce interrompido (300px num painel de 340), sem encostar nas bordas —
+ * assinatura do layout. Todas as linhas têm fio, inclusive a última do grupo.
+ */
+.si-drawer__list {
+	margin: 0 var(--si-space-5);
+	padding: 0;
+	list-style: none;
+}
+
+/* Só o primeiro nível ganha fio: dentro de uma editoria, as subeditorias são
+ * um bloco só, e o fio do pai fecha o grupo inteiro. */
+.si-drawer__list > li {
+	border-bottom: 1px solid var(--si-color-border-subtle);
+}
+
+/*
+ * Subeditorias. O recuo é o que diz que são filhas — cor e corpo menores
+ * sozinhos seriam lidos como "menos importante", não como "dentro de".
+ *
+ * O painel lê dois níveis desde 21/08/2026, então o `.sub-menu` chega ao
+ * HTML. As regras ficam porque a hierarquia existe no menu, e este é o lugar
+ * onde ela apareceria — basta o `depth` mudar quando o designer definir o
+ * destino das subeditorias (H-16). Se a decisão for outra, apagar daqui.
+ */
+.si-drawer__list .sub-menu {
+	margin: 0 0 var(--si-space-3) var(--si-space-4);
+	padding: 0;
+	list-style: none;
+}
+
+.si-drawer__list .sub-menu a {
+	min-height: 44px;
+	padding-block: var(--si-space-1);
+	color: var(--si-color-text-secondary);
+	font-size: var(--si-font-size-ui-md);
+}
+
+/* 12 + 24 de texto + 12 + 1 de fio fecham os 49px da linha do frame. */
+.si-drawer__list a {
+	display: flex;
+	align-items: center;
+	padding-block: var(--si-space-3);
+	color: var(--si-color-text-primary);
+	font-size: var(--si-font-size-ui-lg);
+	line-height: 1.5;
+	text-decoration: none;
+}
+
+/* Hover não desenhado no frame: só cor, como os links do header — fundo
+ * full-bleed brigaria com os fios interrompidos. */
+.si-drawer__list a:hover {
+	color: var(--si-color-text-link);
+}
+
+/*
+ * Pé do painel: só as ações, como no frame "Menu Sanduiche Open" (nó 403:3238).
+ * margin-top automático o ancora embaixo — o painel é uma coluna flex, então o
+ * pé fica no rodapé mesmo quando os menus têm poucos itens.
+ *
+ * As principais e as seções ficavam aqui também, repetidas como etiquetas,
+ * porque o corpo do painel era ocupado pelas secundárias. Com o corpo
+ * reproduzindo o frame, a repetição virou duplicata e saiu (17/08/2026).
+ */
+.si-drawer__foot {
+	margin-top: auto;
+}
+
+.si-drawer__actions {
+	padding: var(--si-space-4) var(--si-space-5);
+	border-top: 1px solid var(--si-color-border-subtle);
+}
+
+.si-drawer__actions-list {
+	display: flex;
+	gap: var(--si-space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.si-drawer__actions-list li {
+	flex: 1;
+}
+
+.si-drawer__actions-list a {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* 43px no Figma; 44 atende o alvo mínimo de toque. */
+	min-height: 44px;
+	border: 1px solid var(--si-color-border-default);
+	color: var(--si-color-text-primary);
+	font-size: var(--si-font-size-ui-sm);
+	text-decoration: none;
+}
+
+/* Mesmo critério da barra: o último item é a chamada principal. */
+.si-drawer__actions-list li:last-child a {
+	border-color: var(--si-color-brand-primary);
+	background-color: var(--si-color-brand-primary);
+	color: var(--si-color-brand-on-primary);
+	font-weight: var(--si-font-weight-label);
+}
+
+.si-drawer__actions-list li:last-child a:hover {
+	border-color: var(--si-color-brand-primary-hover);
+	background-color: var(--si-color-brand-primary-hover);
+	color: var(--si-color-brand-on-primary);
+}
+
+/* =====================================================================
+ * 7. RESPONSIVO
+ * ===================================================================== */
+
+@media (min-width: 480px) {
+	.si-header {
+		--si-header-bar-height: 64px;
+		--si-header-logo-height: 48px;
+	}
+}
+
+@media (min-width: 768px) {
+	.si-header {
+		--si-header-logo-height: 64px;
+	}
+
+	/*
+	 * As ações entram cedo: o botão de assinatura é o elemento de maior valor
+	 * do cabeçalho e não deveria ficar escondido atrás do sanduíche no tablet.
+	 */
+	.si-header__side--end {
+		display: flex;
+	}
+
+	.si-nav--actions {
+		display: flex;
+	}
+}
+
+/* A navegação de editorias cabe inline a partir daqui. */
+@media (min-width: 1024px) {
+	.si-header {
+		--si-header-bar-height: 80px;
+	}
+
+	/*
+	 * As duas navegações entram JUNTAS.
+	 *
+	 * ⚠️ As seções (Opinião, Dashboard, Cúpula) entravam só em 1280px, três
+	 * degraus depois das ações e um depois das editorias. O efeito era um
+	 * cabeçalho pela metade entre 1024 e 1279: Economia a Judiciário à
+	 * esquerda, Login e Assine à direita, e as três seções em lugar nenhum —
+	 * `.si-nav` nasce `display: none`, então elas não ficavam escondidas atrás
+	 * do logo, ficavam fora da árvore de layout. `elementFromPoint` no centro
+	 * de cada uma devolvia `null` em 1024, 1100 e 1200px.
+	 *
+	 * Só o drawer as alcançava, e é exatamente a faixa de largura de um
+	 * laptop. Reclamação do cliente em 17/08/2026 ("Opinião + Dashboard
+	 * precisam estar clicáveis"), item 4 de docs/ajustes-cliente.md.
+	 *
+	 * Cabem com folga: em 1024px o logo termina em 556px e o grupo da direita,
+	 * já com as seções, começa em 711px.
+	 */
+	:is(.si-nav--primary, .si-nav--secondary) {
+		display: block;
+	}
+
+	.si-header__divider {
+		display: block;
+	}
+}
+
+/*
+ * Layout do Figma: barra de 95px, logo centralizado sobrepondo o fio inferior
+ * e navegação de seções à direita.
+ */
+@media (min-width: 1280px) {
+	.si-header {
+		--si-header-bar-height: 95px;
+		--si-header-logo-height: 125px;
+		/*
+		 * 12px em volta da marca de 173px dá a caixa de ~197px que no Figma
+		 * mede 198px — é ela que interrompe o fio inferior do cabeçalho. Entra
+		 * duas vezes na conta do avanço, uma por lado.
+		 */
+		--si-header-logo-pad: var(--si-space-3);
+	}
+
+	/*
+	 * O avanço resolve em 53px aqui — (125 + 24) de caixa contra (95 + 1) de
+	 * barra —, e é isso que a faixa de subeditorias, o painel de busca e a
+	 * reserva do cabeçalho descontam. Nada disso está escrito à mão.
+	 */
+
+	.si-header__inner {
+		/*
+		 * Sem gap: no desktop o logo sai do fluxo e a coluna do meio zera,
+		 * então as duas laterais dividem exatamente a largura útil, como as
+		 * duas metades de 576px do Figma.
+		 */
+		gap: 0;
+	}
+
+	/* Sai do fluxo e passa a sobrepor o fio, como no Figma. */
+	.si-header__logo {
+		position: absolute;
+		top: 0;
+		left: 50%;
+		z-index: 2;
+		flex: 0 0 auto;
+		background-color: var(--si-color-surface-page);
+		transform: translateX(-50%);
+	}
+}
+
+/* =====================================================================
+ * 8. AS TRÊS APRESENTAÇÕES DO CABEÇALHO
+ * =====================================================================
+ *
+ * O Figma tem cabeçalhos diferentes para home, matéria e listagem. Conferido
+ * nó a nó em 21/08/2026: a linha de botões, editorias e seções é IDÊNTICA nos
+ * cinco frames (mesmas coordenadas x, mesmas larguras). A única diferença é a
+ * marca — e, como as alturas do cabeçalho são entradas calculadas (ver o topo
+ * do arquivo), cada apresentação é só um jogo de entradas diferente.
+ *
+ *   | frame                       | barra | marca ao centro     | monograma |
+ *   |-----------------------------|-------|---------------------|-----------|
+ *   | 114:319   home              |  95px | inteira, 125px      | —         |
+ *   | 124:3275  notícia           |  95px | inteira, 56px       | —         |
+ *   | 127:6225  entrevista        |  95px | inteira, 56px       | —         |
+ *   | 122:1731  editoria          |  95px | assinatura, 24px    | 48×35     |
+ *   | 202:1966  cúpula (listagem) |  95px | assinatura, 24px    | 48×35     |
+ *
+ * ⚠️ **Só a partir de 1280px.** Abaixo disso não existe frame nenhum, e as
+ * três apresentações continuam sendo a mesma — a marca inteira, dentro da
+ * barra, sem avanço. É a regra do CLAUDE.md: fidelidade ao pixel vale do
+ * desktop para cima; abaixo, adaptação coerente.
+ *
+ * ⚠️ A apresentação condensada tem DOIS donos, e por isso os seletores abaixo
+ * são `:is(.si-header--listagem, .si-header.is-fixo)`. A home a veste
+ * quando o cabeçalho principal sai de cena e a barra fixa entra — foi a
+ * decisão do cliente para o `L2-10` em 24/08/2026, e ela evita inventar um
+ * quarto desenho: o cabeçalho fixo É o da editoria.
+ */
+@media (min-width: 1280px) {
+
+	/*
+	 * MATÉRIA e LISTAGEM: a marca cabe dentro da barra, então o avanço zera
+	 * sozinho pela fórmula — (56 + 0) contra (95 + 1) dá negativo, e o
+	 * max(0px, …) o segura em zero. Nenhum número de folga é escrito aqui.
+	 */
+	.si-header--materia {
+		--si-header-logo-height: 56px;
+		--si-header-logo-pad: 0px;
+	}
+
+	/*
+	 * LISTAGEM: a altura da entrada é a da JANELA da assinatura (24px), não a
+	 * da marca inteira — é a janela que ocupa espaço no cabeçalho.
+	 */
+	:is(.si-header--listagem, .si-header.is-fixo) {
+		--si-header-logo-height: 24px;
+		--si-header-logo-pad: 0px;
+		--si-header-monograma-height: 35px;
+	}
+
+	/*
+	 * Com a marca dentro da barra, o `top: 0` da home deixa de servir: ela
+	 * ficaria colada no fio de cima. Centrada, resolve nos 20px do frame da
+	 * matéria e nos 36px do frame da listagem, sem nenhum dos dois escrito.
+	 */
+	:is(.si-header--materia, .si-header--listagem, .si-header.is-fixo) .si-header__logo {
+		top: 50%;
+		transform: translate(-50%, -50%);
+	}
+
+	/* --- assinatura horizontal (147×24), ao centro da listagem ----------- */
+
+	:is(.si-header--listagem, .si-header.is-fixo) .si-logo--assinatura .si-logo__janela {
+		position: relative;
+		/* 147/24 = 6.125 — a proporção da janela do nó 122:1731. */
+		width: calc(var(--si-header-logo-height) * 6.125);
+		overflow: hidden;
+	}
+
+	:is(.si-header--listagem, .si-header.is-fixo) .si-logo--assinatura .si-logo__fonte {
+		position: absolute;
+		top: -398.814%;
+		left: -8.844%;
+		width: 117.687%;
+		height: 522.499%;
+		max-width: none;
+		/*
+		 * `fill`, e não `contain`: a janela e a imagem escalada já têm a mesma
+		 * proporção por construção, e o `contain` só acrescentaria uma faixa
+		 * vazia pelo arredondamento do transform do Figma (0,4%).
+		 */
+		object-fit: fill;
+
+		/*
+		 * ⚠️ A assinatura da listagem é PRETA, não vinho — e não é outro
+		 * arquivo. O nó 122:1774 aplica `filters` sobre a MESMA imagem:
+		 * saturation −1, exposure −0,54, contrast +0,3. Medido por amostragem
+		 * de pixel na exportação do frame em 21/08/2026: a assinatura sai em
+		 * #101010 enquanto o monograma ao lado, sem filtro, fica no #772225 da
+		 * marca. Só a assinatura muda de cor; a home e a matéria seguem vinho.
+		 *
+		 * Os três controles da Figma não têm equivalente em CSS, então a conta
+		 * é feita pelo RESULTADO: `brightness(0)` zera qualquer cor de origem e
+		 * `invert()` levanta o preto até os 16/255 do frame. Escrito assim, e
+		 * não como `grayscale() brightness()` calibrado no vinho de hoje, para
+		 * continuar dando preto se a marca for trocada por outra cor — o logo
+		 * vetorizado ainda é entrega pendente do cliente.
+		 */
+		filter: brightness(0) invert(6.27%);
+	}
+
+	/* --- monograma (48×35), na margem esquerda da listagem --------------- */
+
+	:is(.si-header--listagem, .si-header.is-fixo) .si-header__monograma {
+		position: absolute;
+		top: 50%;
+		/*
+		 * 25px da borda da página é onde os frames 122:1731 e 202:1966 o põem,
+		 * numa página de 1534px — fora do container, na margem.
+		 *
+		 * A conta protege as larguras em que essa margem não existe: entre
+		 * 1280 e ~1390px ela é estreita demais para caber o monograma, e o
+		 * `max()` o traz de volta para a goteira em vez de deixá-lo sair da
+		 * tela. Quem garante que ele não cobre o botão de menu é a reserva
+		 * logo abaixo.
+		 */
+		left: max(
+			var(--si-container-gutter),
+			min(25px, calc((100% - var(--si-container-max)) / 2 - 60px))
+		);
+		z-index: 2;
+		transform: translateY(-50%);
+	}
+
+	/*
+	 * A reserva. Vale a goteira de sempre enquanto a margem da página comporta
+	 * o monograma (a partir de ~1390px, o que inclui os 1534px do frame) e
+	 * cresce só abaixo disso, empurrando o botão de menu para a direita em vez
+	 * de deixá-lo por baixo da marca. 97px = 25 de recuo + 48 de largura + 24
+	 * de respiro.
+	 *
+	 * ⚠️ A reserva mora no CONTAINER, não na coluna da esquerda. Medido em
+	 * 21/08/2026: na coluna, o `100%` da conta resolve contra a faixa `1fr` da
+	 * grade — que por sua vez depende do padding —, a conta virou circular e o
+	 * botão de menu foi parar no meio da barra, com 0×0. No container, o
+	 * `100%` é a largura da barra, que é o que a fórmula quer dizer.
+	 */
+	:is(.si-header--listagem, .si-header.is-fixo) .si-header__inner {
+		padding-left: max(
+			var(--si-container-gutter),
+			calc(97px + var(--si-container-gutter) - (100% - var(--si-container-max)) / 2)
+		);
+	}
+
+	:is(.si-header--listagem, .si-header.is-fixo) .si-logo--monograma .si-logo__janela {
+		position: relative;
+		/* 48/35 = 1.3714 — a proporção da janela do nó 122:1731. */
+		width: calc(var(--si-header-monograma-height) * 1.3714);
+		height: var(--si-header-monograma-height);
+		overflow: hidden;
+	}
+
+	:is(.si-header--listagem, .si-header.is-fixo) .si-logo--monograma .si-logo__fonte {
+		position: absolute;
+		top: -6.281%;
+		left: -20.492%;
+		width: 141.803%;
+		height: 137.802%;
+		max-width: none;
+		object-fit: fill;
+	}
+}
+
+/*
+ * Abaixo de 1280px o monograma não é impresso.
+ *
+ * ⚠️ Não é conteúdo escondido para "resolver o mobile": é a MESMA marca que
+ * segue ao centro da barra, no mesmo link para a home. O que sai é a repetição
+ * dela na margem — margem que, abaixo dessa largura, não existe.
+ */
+@media (max-width: 1279.98px) {
+	.si-header__monograma {
+		display: none;
+	}
+}
+
+/* =====================================================================
+ * 9. BARRA FIXA (L2-10)
+ * =====================================================================
+ *
+ * O cliente pediu em 18/08/2026 um cabeçalho condensado que aparece ao rolar,
+ * "assim que o Header principal desaparecer", e mandou uma imagem em vez de um
+ * frame — o item ficou parado por não haver nó no Figma que o descrevesse.
+ * Em 24/08/2026 ele respondeu o que faltava: **a barra fixa é a mesma da
+ * editoria**. Então não há desenho novo aqui; há a apresentação condensada,
+ * que a seção 8 já define, vestida pela home quando `is-fixo` entra.
+ *
+ * ⚠️ **Vale no portal inteiro desde 25/08/2026**, a pedido do cliente. Antes
+ * era só a home; nas demais o cabeçalho rolava para fora e não voltava.
+ *
+ * ⚠️ **Uma barra só, não duas.** A home e a matéria imprimem as duas marcas e
+ * o CSS mostra uma de cada vez. Uma segunda barra traria um segundo <nav>, os
+ * mesmos links outra vez e o dobro de paradas de tabulação.
+ *
+ * ⚠️ Sem JavaScript nada disso acontece: o cabeçalho fica no fluxo, como
+ * sempre esteve. É melhoria progressiva, não requisito.
+ */
+
+/* A marca condensada só existe quando a barra está fixa. */
+.si-header__logo-condensado {
+	display: none;
+}
+
+.si-header.is-fixo .si-header__logo-condensado {
+	display: block;
+}
+
+/*
+ * `display: none` e não `visibility`/opacidade: é o que tira a marca escondida
+ * da árvore de acessibilidade. Com qualquer outro, haveria dois links "Saúde
+ * Insider" na mesma barra, um deles invisível.
+ */
+/*
+ * ⚠️ Só onde EXISTE marca condensada — home e matéria. Na listagem a marca de
+ * repouso já é a assinatura, e não há `.si-header__logo-condensado` no markup:
+ * a regra sem esta restrição escondia a única marca da barra, e a editoria
+ * rolava sem logo nenhum. Medido em 25/08/2026.
+ */
+:is(.si-header--home, .si-header--materia).is-fixo .si-header__logo > :not(.si-header__logo-condensado) {
+	display: none;
+}
+
+/* O monograma da home nasce escondido; a barra fixa é que o revela. */
+/*
+ * O monograma pertence à apresentação condensada. Na listagem ele já está lá
+ * em repouso; na home e na matéria só aparece quando a barra fixa entra.
+ */
+:is(.si-header--home, .si-header--materia):not(.is-fixo) .si-header__monograma {
+	display: none;
+}
+
+.si-header.is-fixo {
+	position: fixed;
+	top: 0;
+	right: 0;
+	left: 0;
+	/*
+	 * Acima do conteúdo e do trilho de compartilhar (que é `sticky`), abaixo do
+	 * drawer e do seu fundo — senão o painel aberto ficaria por baixo da barra.
+	 */
+	z-index: 20;
+	box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+}
+
+/* Vale a altura medida pelo JS, e só enquanto o cabeçalho está fora do fluxo. */
+.si-header__espaco {
+	display: none;
+	height: var(--si-header-altura-fluxo, 0px);
+}
+
+.si-header.is-fixo + .si-header__espaco {
+	display: block;
+}
+
+/*
+ * A entrada. Um deslize curto de cima, para a barra não brotar do nada.
+ *
+ * ⚠️ `transform` e não `top`: `top` reposiciona e obriga o navegador a
+ * recalcular o layout a cada quadro, justo durante a rolagem.
+ */
+@media (prefers-reduced-motion: no-preference) {
+	.si-header.is-fixo {
+		animation: si-barra-desce 160ms ease-out;
+	}
+
+	@keyframes si-barra-desce {
+		from {
+			transform: translateY(-100%);
+		}
+
+		to {
+			transform: translateY(0);
+		}
+	}
+}

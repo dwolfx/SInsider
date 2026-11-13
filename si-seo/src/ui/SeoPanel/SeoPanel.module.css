@@ -1,0 +1,98 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 20px 24px 20px;
+  background: var(--si-color-neutral-50, #f8fafc);
+  min-height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--si-font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+}
+
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--si-color-neutral-50, #f8fafc);
+  padding: 16px 20px 14px 20px;
+  margin: 0 -20px;
+  border-bottom: 1px solid var(--si-color-neutral-200, #e2e8f0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  background: #ffffff;
+  padding: 12px;
+  border: 1px solid var(--si-color-neutral-200, #e2e8f0);
+  border-radius: var(--si-radius-md, 8px);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.statValue {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--si-color-neutral-900, #0f172a);
+}
+
+.statLabel {
+  font-size: 0.625rem;
+  color: var(--si-color-neutral-600, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+/* Banner da Etapa 1 (Quando ainda não definiu a palavra-chave foco) */
+.onboardingBanner {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--si-radius-md, 8px);
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.bannerIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--si-color-primary, #0066cc);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.bannerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bannerTitle {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--si-color-neutral-900, #0f172a);
+  margin: 0;
+}
+
+.bannerText {
+  font-size: 0.75rem;
+  color: var(--si-color-neutral-700, #334155);
+  margin: 0;
+  line-height: 1.4;
+}

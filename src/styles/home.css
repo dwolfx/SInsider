@@ -1,0 +1,1265 @@
+/**
+ * Saúde Insider — home.
+ *
+ * Só o que é exclusivo da home. Chapéu, linha de metadados, ícone, chamada,
+ * grade, item de lista e cabeçalho de seção vivem no `components.css`, que
+ * carrega em todas as páginas — a editoria e a matéria usam os mesmos.
+ *
+ * O que sobra aqui são os arranjos de bloco (manchete, citação, listas, agenda,
+ * podcast, blocos por editoria) e os overrides contextuais que eles aplicam
+ * sobre os componentes compartilhados, como `.si-hero__col .si-card`. Esses
+ * overrides dependem de `components.css` vir antes no enfileiramento.
+ *
+ * Mobile-first: a base empilha tudo numa coluna. Em 768px as chamadas passam a
+ * duas colunas sob a manchete e em 1024px entra o arranjo de três colunas do
+ * Figma, que atinge as proporções exatas a partir de 1280px.
+ *
+ * Breakpoints repetidos literalmente (768, 1024): custom properties não
+ * funcionam dentro de @media.
+ */
+
+/* =====================================================================
+ * 1. ESTRUTURA DO BLOCO
+ * ===================================================================== */
+
+/*
+ * Sem fio fechando o bloco: o wrapper do HomeHero não tem stroke no Figma.
+ * Quem separa a manchete do que vem abaixo é o fio do rótulo da faixa de
+ * publicidade, que já atravessa a largura na altura do texto. Um fio aqui
+ * duplicaria a divisória.
+ */
+.si-hero {
+	position: relative;
+}
+
+/*
+ * O respiro vertical fica no container, não nas colunas.
+ *
+ * É isso que mantém os fios verticais 24px acima do fio horizontal que fecha
+ * a seção, como no Figma: lá a régua tem 651px dentro de um wrapper de 699px
+ * com 24px de padding em cima e embaixo. Se o padding estivesse nas colunas,
+ * a borda delas cresceria junto e encostaria embaixo.
+ */
+.si-hero__inner {
+	display: grid;
+	/* Só entre linhas: no desktop as três colunas ficam numa linha só e os
+	 * fios precisam encostar na borda da coluna vizinha. */
+	row-gap: var(--si-space-6);
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding-block: var(--si-space-6);
+}
+
+/* Cada coluna traz o próprio respiro lateral, como no Figma. */
+.si-hero__lead,
+.si-hero__col {
+	padding-inline: var(--si-container-gutter);
+}
+
+.si-hero__col {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-6);
+}
+
+/*
+ * O chapéu das chamadas laterais é menor que o da manchete e o da grade de
+ * destaques: 9,6px contra 11px. É o único lugar do layout com esse corpo.
+ */
+.si-hero__col .si-kicker {
+	font-size: var(--si-font-size-label-sm);
+}
+
+/*
+ * Fio horizontal entre uma chamada e a próxima. No Figma é um stroke inferior
+ * de 1px em cada card menos o último da coluna, com 24px de respiro antes.
+ * O desenho do fio vem do card; aqui só se decide onde ele aparece.
+ */
+.si-hero__col .si-card:not(:last-child) {
+	padding-bottom: var(--si-card-respiro);
+	border-bottom: var(--si-card-fio);
+}
+
+/*
+ * Com as colunas empilhadas, a emenda entre elas também precisa de fio, senão
+ * a última chamada de uma encosta na primeira da outra sem separação. A partir
+ * de 768px as colunas ficam lado a lado e o fio sai.
+ */
+.si-hero__col--start {
+	padding-bottom: var(--si-space-6);
+	border-bottom: 1px solid var(--si-color-border-subtle);
+}
+
+/*
+ * Bloco 1 incompleto: os fios que emendam colunas saem junto com a coluna.
+ *
+ * ⚠️ Desde o `T-23` as chamadas ao redor da manchete têm portão editorial
+ * (`si_home_block_1`) e o portão é estrito — o bloco pode vir com menos de 5,
+ * ou com nenhuma. `hero.php` deixa de imprimir a coluna vazia e marca o
+ * `.si-hero__inner` com o modificador correspondente; daqui para baixo, o que
+ * este arquivo faz é apagar os fios que passariam a encostar no nada. Sem
+ * isso, a guarda do PHP tira o conteúdo e deixa a divisória.
+ *
+ * O fio acima existe para emendar a coluna da esquerda com a da direita,
+ * empilhadas abaixo de 768px. Sem coluna da direita, não há emenda.
+ */
+.si-hero__inner--sem-direita .si-hero__col--start {
+	padding-bottom: 0;
+	border-bottom: 0;
+}
+
+/* =====================================================================
+ * 2. MANCHETE
+ * ===================================================================== */
+
+/*
+ * O bloco central é centralizado no Figma: chapéu, título, linha fina e data
+ * (nós 114:389/395/397/399, todos CENTER). A legenda da foto não entra — é
+ * flex, os filhos seguem alinhados ao início, como o align LEFT do nó 114:392.
+ */
+.si-hero__lead {
+	text-align: center;
+}
+
+.si-hero__figure {
+	margin-block: var(--si-space-1) var(--si-space-4);
+}
+
+.si-hero__media {
+	display: block;
+}
+
+/*
+ * 3:2 vem do Figma (542x361). Fixar a proporção no CSS elimina deslocamento
+ * de layout mesmo antes de a imagem baixar.
+ */
+.si-hero__img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+	background-color: var(--si-color-surface-muted);
+}
+
+.si-hero__legenda {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--si-space-1);
+	margin-top: var(--si-space-1);
+	color: var(--si-color-text-tertiary);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+.si-hero__credito::before {
+	content: "—";
+	margin-right: var(--si-space-1);
+}
+
+.si-hero__titulo {
+	font-size: var(--si-font-size-h3);
+	font-weight: var(--si-font-weight-h3);
+	line-height: var(--si-line-height-h3);
+	letter-spacing: var(--si-letter-spacing-h3);
+}
+
+.si-hero__titulo a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.si-hero__titulo a:hover {
+	color: var(--si-color-text-link);
+}
+
+/*
+ * Linha fina sem itálico: o frame de referência mostra Inter Regular, e há
+ * pedido explícito do cliente nas anotações do Figma para tirar o itálico
+ * daqui. O token --si-font-style-subheadline segue valendo em outros usos.
+ */
+.si-hero__linha-fina {
+	margin-top: var(--si-space-4);
+	color: var(--si-color-text-tertiary);
+	font-size: var(--si-font-size-subheadline);
+	font-weight: var(--si-font-weight-subheadline);
+	line-height: var(--si-line-height-subheadline);
+}
+
+/*
+ * Data centralizada com o botão de áudio ancorado à direita, como no Figma
+ * (data no container CENTER 114:399, ícone em posicionamento absoluto no
+ * 114:401). O margin-left:auto do botão anularia o justify-content, então
+ * aqui ele sai do fluxo.
+ */
+.si-hero__meta {
+	position: relative;
+	justify-content: center;
+	margin-top: var(--si-space-4);
+}
+
+.si-hero__meta .si-meta__audio {
+	position: absolute;
+	top: 50%;
+	right: 0;
+	margin-left: 0;
+	transform: translateY(-50%);
+}
+
+/* =====================================================================
+ * 3. CITAÇÃO EM DESTAQUE (HomeQuote)
+ * ===================================================================== */
+
+.si-quote__inner {
+	display: grid;
+	gap: var(--si-space-2);
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding: var(--si-space-6) var(--si-container-gutter);
+}
+
+/* Bloco vinho. O padding é o que afasta a moldura interna da borda. */
+.si-quote__bloco {
+	padding: var(--si-space-6);
+	background-color: var(--si-color-brand-primary);
+	color: var(--si-color-brand-on-primary);
+}
+
+/*
+ * Moldura de fio claro por dentro do bloco. É ela que as aspas interrompem
+ * nos cantos, então precisa ser o contexto de posicionamento.
+ */
+.si-quote__moldura {
+	position: relative;
+	padding: var(--si-space-12) var(--si-space-4);
+	border: 1px solid var(--si-color-border-default);
+}
+
+/*
+ * Aspas centradas nos cantos opostos da moldura: no Figma são caixas de 56x56
+ * com o fundo da marca, que mascaram o fio por baixo. O deslocamento de -24px
+ * põe o centro da caixa sobre o canto.
+ */
+.si-quote__aspas {
+	position: absolute;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	background-color: var(--si-color-brand-primary);
+	color: var(--si-color-brand-on-primary);
+}
+
+.si-quote__aspas--abre {
+	top: -24px;
+	left: -24px;
+}
+
+.si-quote__aspas--fecha {
+	right: -24px;
+	bottom: -24px;
+}
+
+/*
+ * A aspa de fechamento é a de abertura girada meia-volta.
+ *
+ * ⚠️ Os dois cantos usavam o MESMO desenho, e o de baixo saía como aspa de
+ * ABERTURA — apontado para fora do texto. É o `icon-aspas.svg` do Figma, que
+ * traz só a variante de abertura.
+ *
+ * `rotate(180deg)`, e não `scaleX(-1)`: girar meia-volta é a relação real
+ * entre “ e ” na tipografia. Espelhar só na horizontal inverte a curva mas
+ * mantém a vírgula pendurada para baixo, e o resultado não é nenhum dos dois
+ * sinais — conferido lado a lado em 24/08/2026, com as três transformações.
+ */
+.si-quote__aspas--fecha .si-icon {
+	transform: rotate(180deg);
+}
+
+/* Este ícone é preenchido, não traçado — daí fill em vez de stroke. */
+.si-quote__aspas .si-icon path {
+	fill: currentColor;
+}
+
+/*
+ * Altura de três linhas reservada, mesmo com citação de duas.
+ *
+ * É o que o Figma faz: o texto ocupa 68px (duas linhas de 33,6) dentro de um
+ * container de 101px. A reserva mantém a altura do bloco estável quando a
+ * citação troca, e é ela que faz a coluna do anúncio caber ao lado em vez de
+ * ultrapassar. A unidade lh já é a altura de linha calculada do elemento.
+ */
+.si-quote__texto {
+	margin: 0;
+	min-height: 3lh;
+	font-family: var(--si-font-serif);
+	font-size: var(--si-font-size-h3);
+	font-weight: var(--si-font-weight-h3);
+	line-height: var(--si-line-height-h3);
+	letter-spacing: var(--si-letter-spacing-h3);
+}
+
+.si-quote__texto a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.si-quote__texto a:hover {
+	text-decoration: underline;
+}
+
+/*
+ * A cor precisa ser explícita: .si-quote__creditos é um <figcaption>, e a
+ * regra global de figcaption (main.css) pintaria os créditos com o cinza de
+ * legenda — ilegível sobre o vinho. No frame o autor é branco a 85% e
+ * cargo/origem a 55% (nós 114:537/539).
+ */
+.si-quote__creditos {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--si-space-2);
+	margin-top: var(--si-space-4);
+	color: var(--si-color-brand-on-primary-strong);
+}
+
+.si-quote__origem {
+	color: var(--si-color-brand-on-primary-soft);
+}
+
+.si-quote__autor {
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-caption);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-caption);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+}
+
+.si-quote__origem {
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-regular);
+	line-height: var(--si-line-height-label);
+}
+
+/* Separador entre cargo e origem — pontuação, não conteúdo. */
+.si-quote__fonte::before {
+	content: "·";
+	margin-inline: var(--si-space-1);
+}
+
+/*
+ * O slot de anúncio embutido não é faixa de página inteira. Dentro da coluna
+ * ele segue as medidas do Figma: 24px de respiro lateral sobre os 292px da
+ * coluna, o que deixa 244px de conteúdo, e gaps de 8px em vez dos 24px que a
+ * faixa usa quando atravessa a home.
+ */
+.si-quote__anuncio .si-ad__inner {
+	max-width: none;
+	gap: var(--si-space-2);
+	padding: 0 var(--si-container-gutter);
+}
+
+/*
+ * Sem fio de fechamento aqui. No Figma o elemento existe, mas com o
+ * preenchimento desligado — é espaçador, não régua. A faixa de página inteira
+ * segue com o dela.
+ */
+.si-quote__anuncio .si-ad__inner::after {
+	content: none;
+}
+
+/*
+ * A moldura acompanha o criativo em vez de emoldurá-lo: no Figma o anúncio de
+ * 250px transborda o container de 244px, então o cinza não aparece. Aqui ele
+ * preenche a coluna e fica contido.
+ */
+.si-quote__anuncio .si-ad__quadro {
+	padding: 0;
+}
+
+
+/* =====================================================================
+ * 4. LISTAS (Recomendadas · Mais Recentes · Mais lidas)
+ * =====================================================================
+ * Três listas lado a lado no desktop, empilhadas abaixo de 1024px.
+ * Duas variantes de item: compacta (marcador + texto) e com mídia (foto 3:2
+ * à esquerda). O fio entre itens usa as variáveis do card.
+ */
+
+.si-lists__inner {
+	display: grid;
+	gap: var(--si-space-6);
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding: var(--si-space-6) 0;
+}
+
+.si-lists__col {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-6);
+	padding-inline: var(--si-container-gutter);
+}
+
+/*
+ * No frame as três colunas fecham exatamente na mesma linha, mas lá os títulos
+ * de preenchimento foram escolhidos para caber. Com título real cada coluna
+ * tem uma altura diferente, e a mais curta terminava 40px acima das outras.
+ * O bloco cresce até a altura da coluna e reparte a sobra entre os itens, em
+ * vez de acumular tudo num vão no pé. Empilhado no mobile não há sobra, então
+ * a regra não tem efeito.
+ */
+.si-lists__itens {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+/*
+ * Anúncio embutido na coluna Recomendadas: mesmas medidas do slot da citação
+ * (gap de 8px entre rótulo e criativo, sem fio de fechamento — nós
+ * 117:1672-1683, com o fio 117:1683 de preenchimento desligado). O respiro
+ * lateral já vem do padding da coluna, então aqui o inner zera o dele —
+ * sem isto o slot sai com o vestido de faixa de página inteira.
+ */
+.si-lists__anuncio .si-ad__inner {
+	max-width: none;
+	gap: var(--si-space-2);
+	padding: 0;
+}
+
+.si-lists__anuncio .si-ad__inner::after {
+	content: none;
+}
+
+.si-lists__anuncio .si-ad__quadro {
+	padding: 0;
+}
+
+/* =====================================================================
+ * 5. AGENDA DE EVENTOS
+ * =====================================================================
+ * Cartão de título e um carrossel com TODOS os eventos da agenda — três à
+ * vista de 1024px para cima, como no Figma. Fios de 1px fechando a seção em cima e
+ * embaixo.
+ *
+ * ⚠️ O grid tem DOIS filhos, não quatro: o cartão e o carrossel. Os eventos
+ * deixaram de ser células do grid em 01/09/2026; quem os divide agora é o flex
+ * da pista, e é ele que define quantos cabem em cada largura.
+ */
+
+.si-agenda__inner {
+	display: grid;
+	gap: var(--si-space-6);
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding: var(--si-space-6) var(--si-container-gutter);
+}
+
+/* Fios de fechamento como pseudo-elementos do grid, em linha inteira. */
+.si-agenda__inner::before,
+.si-agenda__inner::after {
+	content: "";
+	grid-column: 1 / -1;
+	height: 1px;
+	background-color: var(--si-color-border-default);
+}
+
+/*
+ * Cartão do título: bordas vinho só em cima e embaixo, e o texto centralizado
+ * na vertical mas alinhado à esquerda — é assim no Figma, onde a caixa de
+ * texto ocupa a largura útil do cartão e o texto tem align LEFT.
+ */
+.si-agenda__cartao {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: var(--si-space-4);
+	border-block: 1px solid var(--si-color-border-brand);
+	background-color: var(--si-color-surface-subtle);
+}
+
+.si-agenda__titulo {
+	color: var(--si-color-brand-primary);
+	font-size: var(--si-font-size-h2);
+	font-weight: var(--si-font-weight-h2);
+	line-height: var(--si-line-height-h2);
+	letter-spacing: var(--si-letter-spacing-h2);
+	text-transform: uppercase;
+}
+
+/*
+ * A janela e a pista.
+ *
+ * ⚠️ `overflow-x: auto` é o estado SEM JavaScript, e é o que garante que
+ * nenhum evento fique inalcançável: a faixa rola por toque, por teclado e pela
+ * barra. O `agenda.js` troca para `hidden` ao assumir, marcando `.is-ativo` —
+ * daí para frente quem desloca é o `transform` dele.
+ */
+.si-agenda__janela {
+	overflow-x: auto;
+	/* Encaixe por slide para quem rola à mão, sem JS ou por toque. */
+	scroll-snap-type: x mandatory;
+	scrollbar-width: thin;
+}
+
+.si-agenda__carrossel {
+	position: relative;
+	/*
+	 * ⚠️ SEM ISTO A HOME GANHA ROLAGEM HORIZONTAL em telas estreitas.
+	 *
+	 * Item de grid nasce com `min-width: auto`, que é o tamanho mínimo do
+	 * conteúdo — e o conteúdo aqui é uma fila de quatro cartões. A faixa se
+	 * recusava a encolher e transbordava a tela: 212px de sobra em 320,
+	 * 157 em 375, 52 em 480. Medido em 01/09/2026.
+	 *
+	 * O `overflow` da janela não basta: quem precisa poder encolher é o item
+	 * de grid, e ele está uma camada acima.
+	 */
+	min-width: 0;
+}
+
+.si-agenda__carrossel.is-ativo .si-agenda__janela {
+	overflow: hidden;
+	scroll-snap-type: none;
+}
+
+.si-agenda__pista {
+	display: flex;
+	gap: var(--si-space-6);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	/*
+	 * Cartões de altura igual, em toda largura — é o que a célula do grid já
+	 * fazia antes do carrossel, e é o que mantém a seta sempre sobre um cartão.
+	 *
+	 * ⚠️ Isto deixa cinza sobrando embaixo de evento SEM foto: o mais alto da
+	 * fila é o único com imagem, e no celular, com um cartão à vista, medi
+	 * ~200px de vazio em 375px.
+	 *
+	 * ⚠️ `align-items: flex-start` abaixo de 1024 foi TESTADO e descartado.
+	 * Some o cinza, mas a altura da pista continua sendo a do cartão mais alto
+	 * (a faixa não encolhe), e as setas — centradas nessa altura — passam a
+	 * flutuar no vazio embaixo do cartão curto. Trocava um vazio por outro,
+	 * pior: com a seta parecendo solta.
+	 *
+	 * O vazio é sintoma de cadastro, não de layout: evento com imagem
+	 * destacada preenche o cartão.
+	 */
+	align-items: stretch;
+}
+
+/*
+ * Quantos cabem é DAQUI, não do JavaScript — o script mede a pista e conta.
+ * Um por vez até 767, dois entre 768 e 1023, três de 1024 para cima — este
+ * último é o arranjo do Figma.
+ */
+.si-agenda__slide {
+	/*
+	 * ⚠️ `display: flex` para o cartão preencher o slide.
+	 *
+	 * Antes do carrossel o `.si-evento` era célula do grid e esticava até a
+	 * altura da linha — evento sem foto ficava do mesmo tamanho do que tem. Ao
+	 * ganhar o `<li>` por volta, ele passou a encolher para o próprio conteúdo,
+	 * e a fileira virou um serrote. Isto devolve o comportamento antigo.
+	 */
+	display: flex;
+	flex: 0 0 100%;
+	scroll-snap-align: start;
+}
+
+.si-agenda__slide > .si-evento {
+	flex: 1;
+}
+
+/*
+ * ⚠️ Sem `will-change` nem `translateZ(0)` na pista. Camada de composição
+ * própria para uma faixa com 4 a 8 fotos custa memória de vídeo o tempo todo
+ * para ganhar num deslize de 600ms que acontece a cada 6 segundos.
+ */
+
+/* Card de evento. */
+.si-evento {
+	display: flex;
+	flex-direction: column;
+	background-color: var(--si-color-surface-subtle);
+}
+
+.si-evento__img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+	background-color: var(--si-color-surface-muted);
+}
+
+.si-evento__corpo {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-2);
+	padding: var(--si-space-4);
+}
+
+/*
+ * Nome e data ocupam linhas separadas dentro do mesmo bloco, como no Figma,
+ * onde são um único texto de duas linhas.
+ */
+.si-evento__titulo {
+	font-size: var(--si-font-size-h6);
+	font-weight: var(--si-font-weight-h6);
+	line-height: var(--si-line-height-h6);
+	letter-spacing: var(--si-letter-spacing-h6);
+}
+
+/*
+ * Nome em vinho e data em preto, no mesmo bloco de 15px. No Figma é um texto
+ * só com dois segmentos de cor; aqui são dois elementos.
+ */
+.si-evento__nome {
+	display: block;
+	color: var(--si-color-brand-primary);
+}
+
+.si-evento__titulo a {
+	position: relative;
+	color: inherit;
+	text-decoration: none;
+}
+
+/*
+ * Alvo de toque do nome do evento: a linha tem 19px, o pseudo-elemento
+ * amplia para os 44px mínimos — mesmo padrão do botão de áudio.
+ */
+.si-evento__titulo a::after {
+	content: "";
+	position: absolute;
+	inset: -13px 0;
+}
+
+.si-evento__titulo a:hover {
+	text-decoration: underline;
+}
+
+.si-evento__data {
+	display: block;
+	color: var(--si-color-text-primary);
+	font-weight: inherit;
+}
+
+.si-evento__resumo {
+	color: var(--si-color-text-secondary);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+/*
+ * As setas. "Bem suaves", pedido do cliente em 01/09/2026: sem contorno, sem
+ * círculo cheio, translúcidas em repouso e inteiras só quando a pessoa se
+ * aproxima.
+ *
+ * ⚠️ Elas NÃO existem sem JavaScript — quem as cria é o `agenda.js` —, e somem
+ * com `hidden` quando todos os eventos já cabem na janela. Seta que não gira
+ * nada é ruído.
+ *
+ * ⚠️ 44px de alvo de toque em TODAS as larguras, como o resto do tema. O que
+ * encolhe no repouso é a opacidade, nunca a área clicável.
+ */
+.si-agenda__seta {
+	position: absolute;
+	top: 50%;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background-color: var(--si-color-overlay-veil);
+	color: var(--si-color-brand-primary);
+	opacity: 0.55;
+	transform: translateY(-50%);
+	cursor: pointer;
+	transition: opacity 240ms ease, background-color 240ms ease;
+}
+
+/*
+ * ⚠️ 0.55 EM REPOUSO É O MENOR VALOR QUE PASSA NO CONTRASTE, e não uma escolha
+ * de gosto. O critério de componentes de interface do WCAG pede 3:1, e a
+ * medição por pixel do chevron contra o disco deu:
+ *
+ *   0.45 -> 2.72:1  reprova
+ *   0.50 -> 3.00:1  no limite, sem margem
+ *   0.55 -> 3.39:1  passa
+ *   0.60 -> 3.87:1
+ *
+ * "Bem suave" foi o pedido do cliente, então fica no menor degrau que aprova —
+ * baixar mais tornaria a seta bonita e inutilizável para parte das pessoas.
+ */
+
+.si-agenda__seta--anterior {
+	left: var(--si-space-2);
+}
+
+.si-agenda__seta--proxima {
+	right: var(--si-space-2);
+}
+
+/* O chevron do arquivo aponta para a direita; o de voltar é o mesmo, girado. */
+.si-agenda__seta--anterior .si-icon {
+	transform: rotate(180deg);
+}
+
+/*
+ * Aproximar-se do carrossel já as revela — não é preciso acertar a seta para
+ * descobrir que ela existe.
+ */
+.si-agenda__carrossel:hover .si-agenda__seta {
+	opacity: 0.85;
+}
+
+.si-agenda__seta:hover,
+.si-agenda__seta:focus-visible {
+	opacity: 1;
+	background-color: var(--si-color-surface-default);
+}
+
+/* Quem pediu menos movimento recebe a seta sem o esmaecer. */
+@media (prefers-reduced-motion: reduce) {
+	.si-agenda__seta {
+		opacity: 0.8;
+		transition: none;
+	}
+}
+
+
+/* =====================================================================
+ * 6. PODCAST / BRANDED
+ * =====================================================================
+ * Mesmo arranjo de três colunas da seção de listas, reaproveitando
+ * section-header e list-item. A coluna central não tem título no Figma.
+ */
+
+.si-podcast__inner {
+	display: grid;
+	gap: var(--si-space-6);
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding: var(--si-space-6) 0;
+}
+
+.si-podcast__col {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-6);
+	padding-inline: var(--si-container-gutter);
+}
+
+/*
+ * Os itens vão num bloco sem gap, como na seção de listas: o respiro entre
+ * eles é o do próprio item (24px nas compactas, 16px na de mídia). Sem este
+ * agrupamento o gap de 24px da coluna se soma à margem do item e o
+ * espaçamento sai dobrado.
+ */
+.si-podcast__itens {
+	display: flex;
+	flex-direction: column;
+}
+
+/*
+ * O último episódio fecha com fio antes do cartão de destaque — no frame o
+ * stroke desse item está ligado. No de "Branded" está desligado, e o
+ * comportamento padrão (último item sem fio) já atende.
+ */
+.si-podcast__col--podcast .si-item:last-child {
+	padding-bottom: var(--si-space-4);
+	border-bottom: var(--si-card-fio, 1px solid var(--si-color-border-subtle));
+}
+
+/*
+ * Cartão de destaque e anúncio ancorados no pé da coluna. Sem isto, as colunas
+ * laterais terminam onde o conteúdo acaba e sobra um vão em relação à central,
+ * que é mais alta — no Figma as três fecham na mesma linha.
+ */
+.si-podcast__col--podcast .si-promo,
+.si-podcast__col--branded .si-ad {
+	margin-top: auto;
+}
+
+/*
+ * Slot de anúncio embutido: mesmo ajuste da coluna da citação, mas com o
+ * respiro de 24px entre o rótulo e o criativo que o frame usa aqui.
+ */
+.si-podcast__col .si-ad__inner {
+	max-width: none;
+	gap: var(--si-space-6);
+	padding: 0;
+}
+
+.si-podcast__col .si-ad__inner::after {
+	content: none;
+}
+
+.si-podcast__col .si-ad__quadro {
+	padding: 0;
+}
+
+/* Cartão de destaque no pé da coluna de podcast. */
+/*
+ * ⚠️ FUNDO SÓLIDO DESDE 02/09/2026, a pedido do cliente: "não é para usar essa
+ * imagem, pois ela tem um escrito, precisa colocar o background na cor
+ * #5c0b10".
+ *
+ * O Figma desenha uma textura — foto em preto e branco tingida pelo vinho, que
+ * o `background-blend-mode: multiply` reproduzia sobre
+ * `--si-color-brand-primary`. A imagem em produção trazia legenda impressa
+ * dentro do arquivo, e ela aparecia por baixo do texto do cartão.
+ *
+ * ⚠️ Quem parou de emitir a imagem é o TEMPLATE (`promo.php`), não este
+ * arquivo: sem aquilo, a imagem do Customizer voltaria a cobrir esta cor. As
+ * duas coisas andam juntas, e as regras de posição e mistura saíram junto
+ * porque não há mais imagem a posicionar.
+ */
+.si-promo {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-3);
+	padding: var(--si-space-6);
+	background-color: var(--si-color-surface-brand-deep);
+	color: var(--si-color-brand-on-primary);
+}
+
+.si-promo__rotulo {
+	font-family: var(--si-font-serif);
+	font-size: var(--si-font-size-h6);
+	font-weight: var(--si-font-weight-h6);
+	line-height: var(--si-line-height-h6);
+}
+
+.si-promo__titulo {
+	font-family: var(--si-font-serif);
+	/* Caixa alta é tratamento do layout, como nos rótulos. */
+	text-transform: uppercase;
+	/* 30px no Figma; o token h2 é 32px, o mais próximo. */
+	font-size: var(--si-font-size-h2);
+	font-weight: var(--si-font-weight-h2);
+	line-height: var(--si-line-height-h2);
+	letter-spacing: var(--si-letter-spacing-h2);
+}
+
+.si-promo__fio {
+	height: 1px;
+	background-color: var(--si-color-border-default);
+}
+
+.si-promo__descricao {
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+}
+
+.si-promo__link {
+	color: inherit;
+	text-decoration: none;
+}
+
+.si-promo__link:hover .si-promo__titulo {
+	text-decoration: underline;
+}
+
+/*
+ * ⚠️ O TEXTO CONTINUA BRANCO NO HOVER, e isto não é preferência: a regra global
+ * `a:hover` do `main.css` pinta qualquer link de `--si-color-text-link-hover`,
+ * que é o vinho fechado. Sobre o vinho deste cartão isso dava **1,26:1** —
+ * medido em 02/09/2026, praticamente invisível. O sublinhado acima já é o sinal
+ * de hover; a cor não precisa mudar.
+ */
+.si-promo__link:hover,
+.si-promo__link:focus-visible {
+	color: inherit;
+}
+
+/* =====================================================================
+ * 7. AVISOS DE BLOCO VAZIO
+ * =====================================================================
+ * Só chegam a quem tem permissão de editar posts — o visitante não vê a seção.
+ *
+ * São três variantes do mesmo desenho: fio de 4px à esquerda na cor de alerta,
+ * fundo suave e corpo de legenda. Estão juntas de propósito — a duplicação é
+ * visível, e consolidar as três num `.si-aviso` é mudança de markup em quatro
+ * templates, não de CSS.
+ */
+
+/* Manchete sem matéria autorizada, e vaga lateral do bloco 1 sem preenchimento. */
+.si-hero__aviso {
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding: var(--si-space-4) var(--si-container-gutter);
+	border-left: 4px solid var(--si-color-state-warning);
+	background-color: var(--si-color-surface-subtle);
+	color: var(--si-color-text-secondary);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+/* Variante embutida em coluna: mesmo aviso, sem o invólucro de container. */
+.si-lists__aviso {
+	padding: var(--si-space-4);
+	border-left: 4px solid var(--si-color-state-warning);
+	background-color: var(--si-color-surface-subtle);
+	color: var(--si-color-text-secondary);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+/*
+ * Bloco 2: marcaram a vaga 7 e o bloco 1 consumiu todas as marcadas.
+ *
+ * ⚠️ Mora aqui, e não em `components.css` com o resto de `.si-grid`, porque a
+ * grade é compartilhada mas este aviso só existe na home — e `home.css` só é
+ * enfileirado em `is_front_page()` (`inc/enqueue.php`).
+ */
+.si-grid__aviso {
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding: var(--si-space-4) var(--si-container-gutter);
+	border-left: 4px solid var(--si-color-state-warning);
+	background-color: var(--si-color-surface-subtle);
+	color: var(--si-color-text-secondary);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+/* =====================================================================
+ * 8. RESPONSIVO
+ * ===================================================================== */
+
+@media (min-width: 768px) {
+	/*
+	 * ⚠️ A agenda deixou de ter grid de 2 colunas aqui. Com o carrossel, o
+	 * grid tem dois filhos — cartão e faixa —, e pô-los lado a lado espremeria
+	 * a faixa a meia largura. Cartão em cima, faixa embaixo com dois eventos à
+	 * vista, que é mais evento visível do que a versão de duas colunas dava.
+	 */
+	.si-agenda__slide {
+		flex-basis: calc((100% - var(--si-space-6)) / 2);
+	}
+
+	/* As chamadas passam a duas colunas sob a manchete. */
+	.si-hero__inner {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.si-hero__lead {
+		grid-column: 1 / -1;
+	}
+
+	.si-hero__col--end {
+		border-left: 1px solid var(--si-color-border-default);
+	}
+
+	.si-hero__lead {
+		border-bottom: 1px solid var(--si-color-border-default);
+	}
+
+	/*
+	 * Sem chamada nenhuma, o fio sob a manchete não separa coisa alguma: logo
+	 * abaixo já começa a faixa de publicidade, com o fio do próprio rótulo, e
+	 * sairiam duas divisórias coladas.
+	 */
+	.si-hero__inner--sem-chamadas .si-hero__lead {
+		border-bottom: 0;
+	}
+
+	/* Colunas lado a lado: a emenda vertical dispensa o fio horizontal. */
+	.si-hero__col--start {
+		padding-bottom: 0;
+		border-bottom: 0;
+	}
+}
+
+/*
+ * Arranjo de três colunas do Figma. A ordem visual é dada por grid-column,
+ * então o HTML continua com a manchete primeiro.
+ */
+@media (min-width: 1024px) {
+	.si-hero__inner {
+		grid-template-columns: minmax(0, 292fr) minmax(0, 590fr) minmax(0, 292fr);
+	}
+
+	.si-hero__col--start {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.si-hero__lead {
+		grid-column: 2;
+		grid-row: 1;
+		/* Os dois fios verticais que separam as colunas. */
+		border-inline: 1px solid var(--si-color-border-default);
+		border-bottom: 0;
+	}
+
+	.si-hero__col--end {
+		grid-column: 3;
+		grid-row: 1;
+		border-left: 0;
+	}
+
+	/*
+	 * Bloco 1 incompleto: a faixa da coluna que não existe sai do grid, e o
+	 * fio daquele lado sai com ela.
+	 *
+	 * ⚠️ Os dois fios verticais são `border-inline` do `.si-hero__lead`, não
+	 * das colunas — não imprimir a `<div>` remove o conteúdo e deixa o fio.
+	 * E a faixa de 292fr continua reservando o seu terço, o que espremeria a
+	 * manchete no trilho do meio com um terço em branco ao lado.
+	 */
+	.si-hero__inner--sem-direita {
+		grid-template-columns: minmax(0, 292fr) minmax(0, 882fr);
+	}
+
+	.si-hero__inner--sem-direita .si-hero__lead {
+		border-right: 0;
+	}
+
+	.si-hero__inner--sem-chamadas {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.si-hero__inner--sem-chamadas .si-hero__lead {
+		grid-column: 1;
+		border-inline: 0;
+	}
+
+	/*
+	 * A data da última chamada de cada coluna alinha com a data da manchete.
+	 *
+	 * Pedido do cliente em 25/08/2026. Antes as chamadas se empilhavam no topo
+	 * e cada coluna terminava onde o conteúdo acabasse: a manchete fechava em
+	 * y=808, a coluna da esquerda em 781 e a da direita em 683 — três linhas
+	 * de base diferentes na mesma faixa.
+	 *
+	 * Uma linha resolve: `justify-content: space-between` na coluna. As
+	 * chamadas mantêm a altura natural e se distribuem pela faixa, com a
+	 * primeira no topo e a ÚLTIMA colada no pé. Como a linha de metadados é o
+	 * último elemento do cartão, a data dela fica no pé da coluna — e a
+	 * manchete já põe a dela ali.
+	 *
+	 * ⚠️ Foi tentado antes com `grid-auto-rows: 1fr`, que é a leitura literal
+	 * de "espaços separados". Funciona para as laterais, mas as faixas iguais
+	 * são dimensionadas pelo cartão mais alto e a manchete deixa de mandar na
+	 * altura: a faixa do hero cresceu de 633px para 746 e a data da manchete
+	 * ficou 113px acima das outras — o problema invertido. Medido em
+	 * 25/08/2026.
+	 *
+	 * ⚠️ Só a partir de 1024px, que é onde as três colunas existem lado a
+	 * lado. Empilhadas, não há o que alinhar.
+	 *
+	 * ⚠️ O respiro entre as chamadas aumenta, e mais na coluna de duas do que
+	 * na de três — o cliente aceitou o efeito por escrito.
+	 */
+	.si-hero__col {
+		justify-content: space-between;
+	}
+
+	.si-hero__titulo {
+		margin-top: var(--si-space-6);
+	}
+
+	/*
+	 * Podcast: mesma proporção da seção de listas — e, como lá, sem fio
+	 * vertical entre colunas: os nós 114:745/784/836 têm strokes vazios
+	 * (o individualStrokeWeights ficou sem tinta no frame).
+	 */
+	.si-podcast__inner {
+		grid-template-columns: minmax(0, 292fr) minmax(0, 592fr) minmax(0, 292fr);
+		gap: 0;
+	}
+
+	/*
+	 * Agenda: cartão de título mais três eventos, colunas iguais — o arranjo
+	 * do Figma. ⚠️ Entra em 1024, não em 1280: é onde já entrava antes do
+	 * carrossel, e mudar o degrau não foi pedido.
+	 *
+	 * ⚠️ A conta fecha exata. Com 4 colunas iguais de largura `c` e vãos de
+	 * 24, a faixa ocupa `3c + 48`; dentro dela, três slides com dois vãos de
+	 * 24 dão `(3c + 48 − 48) / 3 = c`. Cada evento sai com a largura de uma
+	 * coluna, como se ainda fosse célula do grid.
+	 */
+	.si-agenda__inner {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+
+	.si-agenda__carrossel {
+		grid-column: span 3;
+	}
+
+	.si-agenda__slide {
+		flex-basis: calc((100% - 2 * var(--si-space-6)) / 3);
+	}
+
+
+	/*
+	 * Listas na proporção 292/592/292 do Figma. A coluna central é a única
+	 * com foto, então é a que precisa de largura.
+	 */
+	/*
+	 * Sem align-items: start. As colunas se esticam até a altura da linha, o
+	 * que faz os três fios verticais terminarem juntos — no Figma as colunas
+	 * têm 850px cada. O conteúdo continua alinhado ao topo porque os filhos
+	 * são flex e não crescem.
+	 */
+	/*
+	 * Sem fio vertical entre as colunas: ao contrário da manchete e da grade,
+	 * o frame desta seção não tem nenhum divisor (nó 114:556 — a varredura de
+	 * pixels dos vãos confirma). O fio chegou a existir aqui "como nos demais
+	 * blocos" e saiu por fidelidade.
+	 */
+	.si-lists__inner {
+		grid-template-columns: minmax(0, 292fr) minmax(0, 592fr) minmax(0, 292fr);
+		gap: 0;
+	}
+
+	/*
+	 * Citação e anúncio lado a lado, na proporção 892/292 do Figma.
+	 */
+	/*
+	 * Coluna do anúncio em largura fixa de 292px, como no Figma, em vez de
+	 * fração. O slot tem tamanho de criativo definido, então esticar junto com
+	 * a viewport só faria a moldura crescer em volta dele. A citação fica com
+	 * o resto.
+	 */
+	.si-quote__inner {
+		grid-template-columns: minmax(0, 1fr) 292px;
+		align-items: start;
+	}
+
+}
+
+
+/* =====================================================================
+ * 9. BLOCOS POR EDITORIA
+ * =====================================================================
+ * Três blocos por linha, cada um com o nome da editoria, as três notícias
+ * mais recentes dela e um link para o arquivo. Reaproveita section-header e
+ * list-item; o que é próprio daqui é a grade e o link de fechamento.
+ */
+
+.si-editorias__inner {
+	display: grid;
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding: var(--si-space-6) var(--si-space-2);
+	column-gap: var(--si-space-2);
+	row-gap: var(--si-space-12);
+}
+
+.si-editorias__bloco {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-6);
+	padding-inline: var(--si-container-gutter);
+}
+
+/*
+ * Bloco de itens sem gap próprio: o respiro vem da margem do item, 24px como
+ * no frame. Cresce até a altura do bloco, o que empurra o link "Ver tudo"
+ * para o pé — assim os links de uma mesma linha fecham alinhados mesmo com
+ * títulos de comprimentos diferentes.
+ *
+ * Aqui a sobra fica toda antes do link, e não repartida entre os itens como
+ * na seção de listas: são blocos pequenos lado a lado, e vão de item
+ * diferente entre vizinhos salta à vista mais que um vão maior antes do link.
+ */
+.si-editorias__itens {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+}
+
+/*
+ * Três linhas reservadas para o título, para o fio entre as duas chamadas
+ * cair na mesma altura em todos os blocos.
+ *
+ * Pedido do cliente em 25/08/2026: "considere que todas terão 3 linhas
+ * também, ou seja, a divisória que divide eles precisa sempre estar alinhada
+ * uma com a outra".
+ *
+ * ⚠️ Medido antes, a 1440px: o pé da primeira chamada caía em **três alturas
+ * diferentes** entre os blocos lado a lado — 4812 com título de três linhas,
+ * 4793 com duas. O fio acompanhava, e a linha do bloco ficava serrilhada.
+ *
+ * ⚠️ `min-height` e não `height`: título mais longo continua cabendo, e o fio
+ * daquele bloco desce — é melhor um degrau eventual do que texto cortado. A
+ * mesma escolha do `H-22`, na grade de destaques.
+ *
+ * ⚠️ Vale só dentro do bloco de editorias. A mesma variante compacta é usada
+ * nas listas do meio da home, onde os itens não têm fio entre si e reservar
+ * altura só abriria buracos.
+ */
+.si-editorias__itens .si-item__titulo {
+	min-height: calc(3 * var(--si-line-height-h6) * var(--si-font-size-h6));
+}
+
+/*
+ * Aqui o último item também fecha com fio, ao contrário das demais listas: no
+ * frame os três SideStory têm stroke, e é o fio que separa a lista do link
+ * "Ver tudo".
+ */
+.si-editorias__itens .si-item:last-child {
+	padding-bottom: var(--si-space-4);
+	border-bottom: var(--si-card-fio, 1px solid var(--si-color-border-subtle));
+}
+
+.si-editorias__link {
+	display: inline-flex;
+	align-items: center;
+	align-self: flex-start;
+	/* Alvo de toque de 44px em telas pequenas, sem deslocar o texto. */
+	min-height: var(--si-space-11);
+	gap: var(--si-space-2);
+	color: var(--si-color-brand-primary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-decoration: none;
+	text-transform: var(--si-text-transform-label);
+}
+
+.si-editorias__link:hover .si-editorias__link-texto {
+	text-decoration: underline;
+}
+
+.si-editorias__link .si-icon {
+	flex: 0 0 auto;
+}
+
+@media (min-width: 768px) {
+	.si-editorias__inner {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (min-width: 1024px) {
+	.si-editorias__inner {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	/* Alvo de toque só importa onde se toca; no desktop o link volta ao natural. */
+	.si-editorias__link {
+		min-height: 0;
+	}
+}

@@ -1,0 +1,170 @@
+import { Article, Category, Tag, User, AdUnit } from '@/types';
+import mappedArticles from '../../mapped_articles.json';
+
+export const MOCK_CATEGORIES: Category[] = [
+  {
+    id: 'cat-economia',
+    name: 'Economia',
+    slug: 'economia',
+    description: 'Análises de mercado, indicadores econômicos e impactos financeiros na saúde.',
+    colorHex: '#7a0f16',
+  },
+  {
+    id: 'cat-negocios',
+    name: 'Negócios',
+    slug: 'negocios',
+    description: 'Operadoras de saúde, indústria farmacêutica, hospitais e fusões.',
+    colorHex: '#7a0f16',
+  },
+  {
+    id: 'cat-politica',
+    name: 'Política',
+    slug: 'politica',
+    description: 'Acompanhamento do Congresso Nacional, Ministérios e governos estaduais.',
+    colorHex: '#7a0f16',
+  },
+  {
+    id: 'cat-regulatorio',
+    name: 'Regulatório',
+    slug: 'regulatorio',
+    description: 'Decisões da ANS, Anvisa e agências que regulam o setor.',
+    colorHex: '#7a0f16',
+  },
+  {
+    id: 'cat-judiciario',
+    name: 'Judiciário',
+    slug: 'judiciario',
+    description: 'Judicialização da saúde, decisões do STF, STJ, CNJ e tribunais regionais.',
+    colorHex: '#7a0f16',
+  },
+  {
+    id: 'cat-opiniao',
+    name: 'Opinião',
+    slug: 'opiniao',
+    description: 'Artigos e visões exclusivas dos principais tomadores de decisão.',
+    colorHex: '#7a0f16',
+  },
+  {
+    id: 'cat-tecnologia',
+    name: 'Tecnologia',
+    slug: 'tecnologia',
+    description: 'Inteligência artificial, healthtechs e inovação em saúde digital.',
+    colorHex: '#7a0f16',
+  },
+];
+
+export const MOCK_TAGS: Tag[] = [
+  { id: 't-1', name: 'ANS', slug: 'ans' },
+  { id: 't-2', name: 'Anvisa', slug: 'anvisa' },
+  { id: 't-3', name: 'Judicialização', slug: 'judicializacao' },
+  { id: 't-4', name: 'Planos de Saúde', slug: 'planos-de-saude' },
+  { id: 't-5', name: 'Hospitais', slug: 'hospitais' },
+  { id: 't-6', name: 'Gerontologia', slug: 'gerontologia' },
+];
+
+export const MOCK_USERS: User[] = [
+  {
+    id: 'usr-1',
+    name: 'Victor Hugo',
+    email: 'victorhugo@saudeinsider.com.br',
+    role: 'SUPER_ADMIN',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    bio: 'Product Designer & Fundador de Tecnologia',
+    active: true,
+    permissions: {
+      canCreateArticle: true,
+      canPublishArticle: true,
+      canDeleteArticle: true,
+      canManageUsers: true,
+      canManageAds: true,
+      canViewAnalytics: true,
+    },
+  },
+  {
+    id: 'usr-2',
+    name: 'Edson Rossi',
+    email: 'edson.rossi@saudeinsider.com.br',
+    role: 'EDITOR_CHIEF',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    bio: 'Editor-chefe do Saúde Insider',
+    active: true,
+    permissions: {
+      canCreateArticle: true,
+      canPublishArticle: true,
+      canDeleteArticle: true,
+      canManageUsers: false,
+      canManageAds: true,
+      canViewAnalytics: true,
+    },
+  },
+  {
+    id: 'usr-3',
+    name: 'Lana Pinheiro',
+    email: 'lana.pinheiro@saudeinsider.com.br',
+    role: 'EDITOR_CHIEF',
+    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+    bio: 'Editora Executiva',
+    active: true,
+    permissions: {
+      canCreateArticle: true,
+      canPublishArticle: true,
+      canDeleteArticle: false,
+      canManageUsers: false,
+      canManageAds: false,
+      canViewAnalytics: true,
+    },
+  },
+];
+
+export const MOCK_ADS: AdUnit[] = [
+  {
+    id: 'ad-podcast-conecta',
+    name: 'Banner Podcast Conecta',
+    placement: 'header_billboard',
+    advertiser: 'Podcast Conecta Vinho Saúde Insider',
+    imageUrl: 'https://saudeinsider.com.br/wp-content/uploads/2026/08/podcast-conecta-vinho.png',
+    targetUrl: 'https://saudeinsider.com.br/editoria/podcasts/',
+    type: 'image',
+    active: true,
+    views: 18450,
+    clicks: 940,
+  },
+  {
+    id: 'ad-sidebar-quadro',
+    name: 'Banner Retângulo Editorial',
+    placement: 'sidebar_rectangle',
+    advertiser: 'Cúpula Saúde Insider 2026',
+    imageUrl: 'https://saudeinsider.com.br/wp-content/uploads/2026/08/2026.14.08_ILUSTRACAO_SAUDEINSIDER_SEXTA_CUPULA_MAGNIFIC-1-488x326.jpg',
+    targetUrl: 'https://saudeinsider.com.br/editoria/cupula/',
+    type: 'image',
+    active: true,
+    views: 12400,
+    clicks: 610,
+  },
+  {
+    id: 'ad-in-article-banner',
+    name: 'Banner In-Article Fluid',
+    placement: 'in_article_fluid',
+    advertiser: 'Podcast Conecta Saúde Insider',
+    imageUrl: 'https://saudeinsider.com.br/wp-content/uploads/2026/08/podcast-conecta-vinho.png',
+    targetUrl: 'https://saudeinsider.com.br/editoria/podcasts/',
+    type: 'image',
+    active: true,
+    views: 9400,
+    clicks: 420,
+  },
+  {
+    id: 'ad-bottom-banner',
+    name: 'Banner Rodapé',
+    placement: 'bottom_banner',
+    advertiser: 'Saúde Insider Intelligence',
+    imageUrl: 'https://saudeinsider.com.br/wp-content/uploads/2026/08/podcast-conecta-vinho.png',
+    targetUrl: 'https://saudeinsider.com.br/newsletter/',
+    type: 'image',
+    active: true,
+    views: 8200,
+    clicks: 290,
+  },
+];
+
+export const MOCK_ARTICLES: Article[] = mappedArticles as Article[];

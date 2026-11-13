@@ -1,0 +1,479 @@
+/**
+ * Saúde Insider — Tokens de design
+ *
+ * Fonte da verdade: Style Guide do Figma (file key qHJ0BFcRt5T0SdlNeoQC1M).
+ *   - Cores ............. frame "Fundamentos › Cores"        (nó 11:71)
+ *   - Tipografia ........ frame "Fundamentos › Tipografia"   (nó 11:399)
+ *   - Grid/espaçamento .. frame "Grid e espaçamento"         (nó 11:523)
+ *
+ * Nenhum valor de cor, fonte ou espaçamento deve ser escrito direto nos demais
+ * arquivos CSS — sempre via as variáveis declaradas aqui.
+ *
+ * Convenção de unidade: tipografia em rem (respeita o zoom de fonte do navegador);
+ * espaçamento, grid e larguras em px (reproduz a malha do Figma sem arredondamento).
+ */
+
+:root {
+	/* ===================================================================
+	 * 1. CORES
+	 * ===================================================================
+	 * Duas camadas: primitivas (o valor bruto, nome neutro) e semânticas
+	 * (o papel na interface). Componentes usam SEMPRE a camada semântica —
+	 * trocar um tom da marca deve ser uma edição em um único lugar.
+	 */
+
+	/* -------------------------------------------------------------------
+	 * 1.1 Primitivas — paleta bruta, sem significado de uso
+	 * ----------------------------------------------------------------- */
+
+	/* Vermelho da marca */
+	--si-red-50: #f3e8e9;
+	--si-red-600: #a3262a;
+	--si-red-800: #7a0f16;
+	--si-red-900: #5c0b10;
+
+	/* Cinzas — rampa quente, do fundo mais claro ao preto do rodapé */
+	--si-gray-50: #f7f7f5;
+	--si-gray-100: #ececea;
+	--si-gray-200: #e8e8e5;
+	--si-gray-300: #d6d6d2;
+	--si-gray-500: #9a9a96;
+	/*
+	 * #767676 é o cinza mais escuro que ainda passa no WCAG AA sobre branco
+	 * (4,54:1). O #777777 do Style Guide reprova por pouco (4,48:1) e este
+	 * token pinta data, crédito e legenda — texto pequeno, onde o mínimo de
+	 * 4,5:1 vale integralmente. Divergência a levar para o designer.
+	 */
+	--si-gray-600: #767676;
+	/*
+	 * A linha fina da matéria, "25% mais clara" que o --si-gray-800, a pedido do
+	 * cliente (L2-03 da lista 2, 18/08/2026). É o gray-800 misturado com branco a
+	 * 25% — #3f3f3f + 25% de (255-63) em cada canal dá 111, #6f6f6f. Preenche a
+	 * lacuna que a rampa tinha entre 600 e 800.
+	 *
+	 * Contraste sobre branco: 5,02:1. Passa no AA com folga, e é MAIS seguro que
+	 * o --si-gray-600 (4,54:1) que pinta data e legenda — ver T-02.
+	 *
+	 * ⚠️ As outras duas leituras possíveis de "25% mais claro" foram calculadas e
+	 * descartadas: +25% relativo de lightness em HSL dá #4f4f4f (8,19:1), quase
+	 * imperceptível ao lado do original; +25 pontos de lightness dá #7f7f7f, que
+	 * REPROVA no AA (4,00:1). A mistura com branco é a leitura corrente de
+	 * "clarear 25%" e a única que muda o tom sem quebrar acessibilidade.
+	 */
+	--si-gray-700: #6f6f6f;
+	--si-gray-800: #3f3f3f;
+	--si-gray-900: #111111;
+	--si-gray-950: #050505;
+
+	--si-white: #ffffff;
+
+	/* Preto puro. Só existe como base do véu de sobreposição — o preto do
+	 * rodapé é o --si-gray-950, que tem um leve desvio de neutro. */
+	--si-black: #000000;
+
+	/* Cores funcionais de estado (só aparecem em feedback, nunca no editorial) */
+	--si-green-700: #2f6b4f;
+	--si-amber-700: #9a6a12;
+	--si-blue-700: #315f8c;
+
+	/* -------------------------------------------------------------------
+	 * 1.2 Semânticas — o papel de cada cor na interface
+	 * ----------------------------------------------------------------- */
+
+	/* Brand — identidade e elementos de destaque */
+	--si-color-brand-primary: var(--si-red-800); /* Logo, vinhetas, tags editoriais, estados ativos, links especiais */
+	--si-color-brand-primary-hover: var(--si-red-900); /* Hover de elementos brand */
+	--si-color-brand-primary-muted: var(--si-red-50); /* Fundos discretos, caixas editoriais, estados leves */
+	/* Degradê da página de espera do lançamento: o vinho da marca clareado no
+	 * centro e escurecido nas bordas. Derivados por color-mix para acompanharem
+	 * o tom da marca se ele mudar. */
+	--si-color-brand-primary-glow: color-mix(in srgb, var(--si-red-800) 82%, var(--si-white));
+	--si-color-brand-primary-deep: color-mix(in srgb, var(--si-red-900) 72%, var(--si-black));
+	--si-color-brand-primary-shadow: color-mix(in srgb, var(--si-red-900) 48%, var(--si-black));
+	--si-color-brand-on-primary: var(--si-white); /* Texto sobre fundo brand */
+	/* Hierarquia de texto sobre o vinho, medida na citação da home:
+	 * autor a 85% (nó 114:537) e cargo/origem a 55% (nó 114:539). */
+	--si-color-brand-on-primary-strong: color-mix(in srgb, var(--si-white) 85%, transparent);
+	--si-color-brand-on-primary-soft: color-mix(in srgb, var(--si-white) 55%, transparent);
+
+	/* Text — hierarquia editorial e funcional */
+	--si-color-text-primary: var(--si-gray-900); /* Títulos, corpo editorial principal */
+	--si-color-text-secondary: var(--si-gray-800); /* Subtítulos, linha fina, descrições auxiliares */
+	--si-color-text-tertiary: var(--si-gray-600); /* Legendas, créditos, datas, metadados */
+	/*
+	 * Linha fina da MATÉRIA, só. A da manchete e a das listagens seguem em
+	 * secondary/tertiary — o pedido do cliente é da página de matéria, e clarear
+	 * o token compartilhado despintaria a home inteira junto.
+	 *
+	 * O pedido (18/08/2026) foi "25% mais clara que o cinza de subtítulo", o
+	 * que resolve em #6f6f6f — 5,02:1 sobre branco, acima do mínimo AA de
+	 * 4,5:1. Conferido: clarear mais reprovaria.
+	 *
+	 * ⚠️ Aponta para o degrau da paleta, e não para um `color-mix` com `#fff`
+	 * cru: o valor final é o mesmo, e assim nenhuma cor entra fora da escala.
+	 */
+	--si-color-text-standfirst: var(--si-gray-700);
+	--si-color-text-inverse: var(--si-white); /* Texto sobre fundos escuros (rodapé, labels invertidos) */
+	--si-color-text-link: var(--si-red-800); /* Links editoriais e funcionais */
+	--si-color-text-link-hover: var(--si-red-900); /* Hover de links */
+
+	/* Sombra do painel do drawer (nó 403:3177: 6px 0 32px preto a 14%).
+	 * Único uso de sombra no layout; vive aqui porque cor não entra crua
+	 * nos demais arquivos. */
+	--si-shadow-drawer: 6px 0 32px color-mix(in srgb, var(--si-black) 14%, transparent);
+
+	/* Overlay — véu que escurece o conteúdo sob painéis sobrepostos.
+	 * 45% é a opacidade medida no scrim do frame "Menu Sanduiche Open".
+	 * Serve para o drawer e para qualquer modal futuro. */
+	--si-color-overlay-scrim: color-mix(in srgb, var(--si-black) 45%, transparent);
+
+	/* Véu CLARO — fundo de controle sobreposto a uma foto (setas do
+	 * carrossel). Existe porque o `icon-seta.svg` traz `stroke="#7A0F16"`
+	 * chumbado no arquivo — mas isso NÃO o prende ao vinho: o
+	 * `.si-icon path { stroke: currentColor }` de `components.css` vence o
+	 * atributo, e a cor sai do `color` de quem o contém.
+	 *
+	 * ⚠️ Uma versão anterior deste comentário dizia que o ícone "não usa
+	 * currentColor" e por isso o fundo TINHA de ser claro. É falso, e foi
+	 * descoberto em 25/08/2026: dava para deixar o chevron branco sobre um véu
+	 * escuro. O véu claro fica porque combina com o resto do tema, não porque
+	 * fosse a única saída. Os 85% são os mesmos de
+	 * `--si-color-brand-on-primary-strong`, não um número novo. Sobre foto
+	 * preta o véu resolve em ~#d9d9d9, e o vinho contrasta 7,8:1 com ele —
+	 * bem acima dos 3:1 que a WCAG pede para elemento gráfico. */
+	--si-color-overlay-veil: color-mix(in srgb, var(--si-white) 85%, transparent);
+
+	/* Surface — fundos e áreas de composição */
+	--si-color-surface-page: var(--si-white); /* Fundo principal do portal */
+	--si-color-surface-subtle: var(--si-gray-50); /* Áreas leves, faixas, blocos editoriais discretos */
+	--si-color-surface-muted: var(--si-gray-100); /* Títulos de editoria, agrupamentos, fundos de referência */
+	--si-color-surface-inverse: var(--si-gray-950); /* Fundo escuro — rodapé */
+	--si-color-surface-overlay: var(--si-white); /* Menus, dropdowns, camadas flutuantes */
+	/*
+	 * Vinho mais fechado que o da marca, para bloco que é fundo inteiro e não
+	 * detalhe. Hoje só o cartão de destaque da home usa.
+	 *
+	 * ⚠️ É o mesmo `--si-red-900` de `--si-color-brand-primary-hover` e de
+	 * `--si-color-text-link-hover`, e ainda assim ganha nome próprio: usar um
+	 * token de HOVER como fundo permanente amarraria as duas coisas, e mudar o
+	 * hover dos links repintaria o cartão sem que ninguém percebesse.
+	 */
+	--si-color-surface-brand-deep: var(--si-red-900); /* Fundo vinho fechado — cartão de destaque */
+
+	/* Border — fios e separadores, centrais na estética editorial */
+	--si-color-border-subtle: var(--si-gray-200); /* Divisórias muito leves entre blocos */
+	--si-color-border-default: var(--si-gray-300); /* Linhas de separação padrão entre seções */
+	--si-color-border-strong: var(--si-gray-900); /* Linhas editoriais de maior ênfase, bordas de destaque */
+	--si-color-border-brand: var(--si-red-800); /* Separadores com cor da marca (topo do header, blocos especiais) */
+
+	/* Icon — ícones funcionais */
+	/* Ícones em estado normal. O frame do Portal traça menu e busca em #111111
+	 * (nós 114:326-332) — o gray-800 que ficava aqui saía um tom mais claro. */
+	--si-color-icon-default: var(--si-gray-900);
+	--si-color-icon-muted: var(--si-gray-500); /* Ícones secundários e desabilitados */
+	--si-color-icon-active: var(--si-red-800); /* Ícones ativos ou selecionados */
+	--si-color-icon-inverse: var(--si-white); /* Ícones sobre fundo escuro */
+
+	/* State — feedbacks funcionais, discretos por decisão editorial */
+	--si-color-state-success: var(--si-green-700); /* Confirmações, tags de sucesso */
+	--si-color-state-warning: var(--si-amber-700); /* Alertas, destaque moderado */
+	--si-color-state-error: var(--si-red-600); /* Erros, estados críticos */
+	--si-color-state-info: var(--si-blue-700); /* Informações neutras, dicas */
+
+	/* ===================================================================
+	 * 2. TIPOGRAFIA
+	 * ===================================================================
+	 * Valores conforme as LEGENDAS do Style Guide (confirmado com o designer
+	 * em 03/08/2026), e não conforme o que está aplicado nos textos de exemplo
+	 * do Figma — que usam Georgia por causa de uma variável de fonte
+	 * desatualizada no arquivo.
+	 *
+	 * As duas famílias são Google Fonts e ainda precisam ser carregadas
+	 * (wp_enqueue_style no functions.php) — isto aqui só declara os tokens.
+	 */
+
+	/* -------------------------------------------------------------------
+	 * 2.1 Famílias
+	 * ----------------------------------------------------------------- */
+
+	/* Serifada editorial: títulos e manchetes.
+	 * Fallbacks escolhidos por métrica parecida (serifada de alto contraste). */
+	--si-font-serif: "Playfair Display", "Georgia", "Times New Roman", serif;
+
+	/*
+	 * Serifada DE TEXTO, para leitura longa — corpo da matéria e respostas das
+	 * Questões essenciais (`L2-17` e `L2-21` da lista 2, 18/08/2026).
+	 *
+	 * ⚠️ NÃO é a --si-font-serif. Aquela é de display — a Playfair tem eixo de
+	 * contraste alto e hastes finas, desenhada para título grande —, e duas
+	 * coisas a desaconselham em 17px por parágrafos inteiros:
+	 *   1. o tema carrega Playfair 400/700/900 e NENHUM itálico. Todo <em> do
+	 *      corpo sairia com itálico sintético, que numa serifada é evidente;
+	 *   2. hastes finas em corpo pequeno perdem no antialiasing, e é no mobile
+	 *      que isso aparece primeiro.
+	 *
+	 * A Georgia tem itálico e negrito reais, traço robusto (baixo contraste, que
+	 * é o que sobrevive em corpo pequeno) e é fonte de sistema — não acrescenta
+	 * um byte de download. E é a serifada que o próprio Figma usa: a variável
+	 * "Font Serif" do arquivo resolve para Georgia (visto no nó 200:1004, a
+	 * capitular). A Playfair entrou nos TÍTULOS por decisão fechada com o
+	 * designer em 03/08 (vale a legenda do Style Guide) — decisão que nunca
+	 * alcançou o corpo do texto.
+	 *
+	 * ⚠️ **O CUSTO, medido, é o olho.** Uma versão anterior deste comentário dizia
+	 * que a Georgia resolvia o olho pequeno da Playfair. É FALSO, e no sentido
+	 * oposto: medidas no navegador, em corpo de 100px, as alturas-x são Inter
+	 * 54,6, Playfair 51,5 e **Georgia 48,1** — a Georgia é a MENOR das três,
+	 * 11,9% abaixo da Inter. O corpo da matéria em 17px passa a ler visivelmente
+	 * menor que antes. Se incomodar, o remédio é subir
+	 * `--si-font-size-body`, não trocar de família.
+	 *
+	 * ⚠️ **A confirmar com o designer:** Georgia, ou uma serifada de texto
+	 * carregada como webfont (Lora, PT Serif, Source Serif)? A primeira não
+	 * custa download; a segunda dá controle de marca.
+	 *
+	 * ⚠️ A escolha da família de texto é do designer. Esta é a opção conservadora
+	 * (sistema, sem download, igual ao frame); se ele quiser uma serifada de
+	 * marca para leitura, troca-se aqui. Registrado em N-14.
+	 */
+	--si-font-serif-text: Georgia, "Times New Roman", "Playfair Display", serif;
+
+	/* Sem serifa: corpo de texto, navegação e elementos de UI. */
+	--si-font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+		"Helvetica Neue", Arial, sans-serif;
+
+	/* -------------------------------------------------------------------
+	 * 2.2 Pesos
+	 * ----------------------------------------------------------------- */
+	--si-font-weight-regular: 400;
+	--si-font-weight-medium: 500;
+	--si-font-weight-semibold: 600;
+	--si-font-weight-bold: 700;
+	--si-font-weight-black: 900;
+
+	/* -------------------------------------------------------------------
+	 * 2.3 Escala de títulos — Playfair Display
+	 * -------------------------------------------------------------------
+	 * Tamanhos fluidos: o valor do Figma é o MÁXIMO (desktop) e o mínimo é
+	 * ~65% dele. Não existe layout mobile aprovado no Figma, então os mínimos
+	 * são uma definição nossa — revisar quando houver design de mobile.
+	 */
+
+	/* h1 — Marca S/I e manchetes principais.
+	 * A legenda não especifica line-height; mantido o 1.05 aplicado no Figma.
+	 * Atenção: o peso 900 só existe na Playfair Display. Se ela falhar, o
+	 * fallback Georgia (que só tem 400/700) será sintetizado pelo navegador. */
+	--si-font-size-h1: clamp(2rem, 4.5vw, 3rem); /* 32px → 48px */
+	--si-line-height-h1: 1.05;
+	--si-letter-spacing-h1: -0.02em;
+	--si-font-weight-h1: var(--si-font-weight-black); /* 900 */
+
+	/* h2 — Títulos de matéria, chamadas de editoria */
+	--si-font-size-h2: clamp(1.5rem, 3vw, 2rem); /* 24px → 32px */
+	--si-line-height-h2: 1.2;
+	--si-letter-spacing-h2: 0;
+	--si-font-weight-h2: var(--si-font-weight-bold); /* 700 */
+
+	/* h3 — Títulos de matéria, chamadas de editoria */
+	--si-font-size-h3: clamp(1.3125rem, 2.5vw, 1.75rem); /* 21px → 28px */
+	--si-line-height-h3: 1.2;
+	--si-letter-spacing-h3: 0;
+	--si-font-weight-h3: var(--si-font-weight-bold); /* 700 */
+
+	/* h4 — Títulos de matéria, chamadas de editoria */
+	--si-font-size-h4: clamp(1.125rem, 2vw, 1.375rem); /* 18px → 22px */
+	--si-line-height-h4: 1.2;
+	--si-letter-spacing-h4: 0;
+	--si-font-weight-h4: var(--si-font-weight-bold); /* 700 */
+
+	/* h5 — Títulos de matéria, chamadas de editoria */
+	--si-font-size-h5: clamp(0.9375rem, 1.5vw, 1.0625rem); /* 15px → 17px */
+	--si-line-height-h5: 1.2;
+	--si-letter-spacing-h5: 0;
+	--si-font-weight-h5: var(--si-font-weight-bold); /* 700 */
+
+	/* h6 — Títulos de matéria, chamadas de editoria.
+	 * Entrelinha 1.2533 (18,8px sobre 15px): é o valor aplicado em TODOS os
+	 * títulos de card/item do frame do Portal (chamadas da manchete, grade,
+	 * listas, eventos, blocos por editoria). A legenda do Style Guide não
+	 * especifica entrelinha de h6 — vale o frame. */
+	--si-font-size-h6: clamp(0.875rem, 1.2vw, 0.9375rem); /* 14px → 15px */
+	--si-line-height-h6: 1.2533;
+	--si-letter-spacing-h6: 0;
+	--si-font-weight-h6: var(--si-font-weight-bold); /* 700 */
+
+	/* -------------------------------------------------------------------
+	 * 2.4 Texto corrido e UI — Inter, tamanhos fixos
+	 * -------------------------------------------------------------------
+	 * Não escalam com a viewport: legibilidade de leitura longa e de
+	 * elementos de interface não se beneficia de tamanho fluido.
+	 */
+
+	/* Subheadline — subtítulo / linha fina de matéria (itálico) */
+	--si-font-size-subheadline: 1.125rem; /* 18px */
+	--si-line-height-subheadline: 1.45;
+	--si-letter-spacing-subheadline: 0;
+	--si-font-weight-subheadline: var(--si-font-weight-regular); /* 400 */
+	/* Sem itálico: anotação do cliente na página Portal 2 ("tirar itálico da
+	 * linha-fina"), e nenhum frame do Portal aplica itálico. Era italic até
+	 * 09/08/2026. */
+	--si-font-style-subheadline: normal;
+
+	/* Body — texto longo de matéria, questões essenciais */
+	--si-font-size-body: 1.0625rem; /* 17px */
+	--si-line-height-body: 1.75;
+	--si-letter-spacing-body: 0;
+	--si-font-weight-body: var(--si-font-weight-regular); /* 400 */
+
+	/* Nav — navegação, menus, editorias.
+	 * A legenda não especifica line-height; mantido o 1.5 aplicado no Figma. */
+	--si-font-size-nav: 0.8125rem; /* 13px */
+	--si-line-height-nav: 1.5;
+	--si-letter-spacing-nav: 0.01em;
+	--si-font-weight-nav: var(--si-font-weight-medium); /* 500 */
+
+	/* Label — tags, chapéus, datas, metadados.
+	 * A legenda não especifica line-height; mantido o 1.5 aplicado no Figma. */
+	--si-font-size-label: 0.6875rem; /* 11px */
+	--si-line-height-label: 1.5;
+	--si-letter-spacing-label: 0.1em;
+	--si-font-weight-label: var(--si-font-weight-semibold); /* 600 */
+	--si-text-transform-label: uppercase;
+
+	/*
+	 * Micro-rótulos abaixo do Label.
+	 *
+	 * Não estão no Style Guide: foram medidos direto nos frames do Portal, onde
+	 * aparecem em elementos de apoio que precisam ceder espaço ao conteúdo.
+	 * Herdam peso, entrelinha e caixa alta do Label — só o corpo muda.
+	 */
+	--si-font-size-label-sm: 0.6rem;  /* 9.6px — chapéu das chamadas laterais da manchete */
+	--si-font-size-label-xs: 0.55rem; /* 8.8px — rótulo das faixas de publicidade */
+
+	/*
+	 * Título do item com mídia (Mais Recentes e coluna central do Podcast).
+	 *
+	 * 18px/21,3px medidos nos frames do Portal (nós 114:618, 114:793 etc.) —
+	 * não está no Style Guide, e o h5 (17px) que o aproximava ficava 1px
+	 * abaixo do frame. Mínimo do clamp na proporção dos títulos vizinhos.
+	 */
+	--si-font-size-item-media: clamp(1rem, 1.6vw, 1.125rem); /* 16px → 18px */
+	--si-line-height-item-media: 1.1833; /* 21,3px sobre 18px */
+
+	/*
+	 * Linha fina da LINHA DE ARQUIVO (`ArticleRow`), na editoria e na busca.
+	 *
+	 * ⚠️ Token próprio porque o Style Guide não tem um de linha fina, e porque o
+	 * que se usava aqui — o de subheadline, 18px — deixava o texto MAIOR que o
+	 * título em telas abaixo de 1024, onde o título cai para 16px. Pedido do
+	 * cliente em 04/09/2026: "o tamanho desse texto tem que ser menor ou igual ao
+	 * título, não maior".
+	 *
+	 * 16px/1.6 são os valores do próprio frame — a divergência #3 do CLAUDE.md
+	 * registrava justamente isso, e ela deixa de existir com estes tokens.
+	 *
+	 * ⚠️ 1.6 é generoso de propósito. A Playfair tem olho 5,8% MENOR que a Inter
+	 * no mesmo corpo (medido nos woff2 do tema, no `L2-03`), então trocar a
+	 * família já encolhe o texto aparente; apertar a entrelinha em cima disso
+	 * castigaria a leitura de um bloco de três linhas.
+	 */
+	--si-font-size-row-standfirst: 1rem; /* 16px — o título vai de 16 a 18 */
+	--si-line-height-row-standfirst: 1.6; /* 25,6px */
+
+	/*
+	 * Display — masthead de seção assinada (Cúpula): serifada 400 de 80px.
+	 * Medido nos frames 202:1962 e 273:1159; não está no Style Guide.
+	 * A entrelinha 1 substitui o 0.63 do Figma, que em CSS decaparia
+	 * ascendentes — o encaixe visual é dado pelo padding do banner.
+	 */
+	--si-font-size-display: clamp(2.5rem, 8vw, 5rem); /* 40px → 80px */
+	--si-line-height-display: 1;
+	--si-letter-spacing-display: -0.012em;
+	--si-font-weight-display: var(--si-font-weight-regular); /* 400 */
+
+	/* Capitular da matéria: ~96px pendurados na margem em ≥1280 (nó do frame
+	 * da Notícia); abaixo disso vira capitular flutuada clássica. */
+	--si-font-size-dropcap: 6rem; /* 96px */
+
+	/*
+	 * UI do drawer (menu sanduíche aberto, frame 403:4913): três degraus que
+	 * não existem na escala editorial — links 16px, campo de busca 15px,
+	 * botões 14px.
+	 */
+	--si-font-size-ui-sm: 0.875rem;  /* 14px — botões do drawer */
+	--si-font-size-ui-md: 0.9375rem; /* 15px — campo de busca do drawer */
+	--si-font-size-ui-lg: 1rem;      /* 16px — links de navegação do drawer */
+
+	/* Caption — legendas, créditos fotográficos */
+	--si-font-size-caption: 0.75rem; /* 12px */
+	--si-line-height-caption: 1.5;
+	--si-letter-spacing-caption: 0;
+	--si-font-weight-caption: var(--si-font-weight-regular); /* 400 */
+
+	/* ===================================================================
+	 * 3. ESPAÇAMENTO
+	 * ===================================================================
+	 * Base 4px: --si-space-N equivale a N × 4px.
+	 * O Style Guide ("Sistema de espaçamento — base 4px") canoniza apenas
+	 * estes degraus: 4, 8, 12, 16, 24, 32, 48, 64 e 96px — marcados com ★.
+	 * Os intermediários existem para casos pontuais; prefira sempre um ★.
+	 */
+	--si-space-1: 4px; /* ★ */
+	--si-space-2: 8px; /* ★ */
+	--si-space-3: 12px; /* ★ */
+	--si-space-4: 16px; /* ★ */
+	--si-space-5: 20px;
+	--si-space-6: 24px; /* ★ */
+	--si-space-7: 28px;
+	--si-space-8: 32px; /* ★ */
+	--si-space-9: 36px;
+	--si-space-10: 40px;
+	--si-space-11: 44px;
+	--si-space-12: 48px; /* ★ */
+	--si-space-13: 52px;
+	--si-space-14: 56px;
+	--si-space-15: 60px;
+	--si-space-16: 64px; /* ★ */
+
+	/* Padding vertical do masthead de seção (frames da Cúpula). Fora dos
+	 * degraus ★, mas segue a regra N × 4px, como o --si-space-24. */
+	--si-space-20: 80px;
+
+	/* 96px é o último degrau do Style Guide, mas cai fora da faixa 1–16
+	 * pedida para a escala. Mantido com o nome que a regra N × 4px exige. */
+	--si-space-24: 96px; /* ★ */
+
+	/* ===================================================================
+	 * 4. BREAKPOINTS
+	 * ===================================================================
+	 * ⚠️ Estes valores NÃO vêm do Figma nem do CLAUDE.md — foram definidos
+	 * pelo Danilo em 03/08/2026. O CLAUDE.md cita uma seção "Responsivo"
+	 * que nunca foi escrita, e não há layout mobile/tablet aprovado.
+	 *
+	 * ⚠️ Custom properties não funcionam dentro de @media — `@media
+	 * (min-width: var(--si-bp-md))` é inválido. Estes tokens servem de
+	 * referência única de valor (e para leitura via JS); nas media queries
+	 * o número precisa ser repetido literalmente. Ao mudar um valor aqui,
+	 * busque a ocorrência antiga nos demais arquivos CSS.
+	 */
+	--si-bp-sm: 480px; /* celular grande */
+	--si-bp-md: 768px; /* tablet retrato */
+	--si-bp-lg: 1024px; /* tablet paisagem */
+	--si-bp-xl: 1280px; /* desktop — comporta o container de 1200px + gutters */
+
+	/* ===================================================================
+	 * 5. LARGURA DE CONTEÚDO E GRID
+	 * ===================================================================
+	 * Style Guide, seção "Grid": "4 colunas, max-width 1200px,
+	 * espaçamento base 4px". O gutter de 16px vem da geometria do demo de
+	 * grid (4 colunas de 247,5px + 3 vãos de 16px = 1038px).
+	 */
+	--si-container-max: 1200px; /* largura máxima do conteúdo */
+	--si-grid-columns: 4; /* colunas no desktop */
+	--si-grid-gutter: var(--si-space-4); /* 16px — vão entre colunas */
+
+	/* Respiro nas laterais do container. ⚠️ Não há valor definido no Figma —
+	 * assumido 24px (degrau ★ da escala). Ajustar quando o layout de mobile
+	 * for aprovado. */
+	--si-container-gutter: var(--si-space-6); /* 24px */
+}

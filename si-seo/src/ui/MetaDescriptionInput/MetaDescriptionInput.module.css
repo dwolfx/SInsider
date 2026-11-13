@@ -1,0 +1,80 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--si-color-neutral-800, #1e293b);
+}
+
+.counter {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.counterSuccess {
+  color: var(--si-color-success, #10b981);
+}
+
+.counterWarning {
+  color: var(--si-color-warning, #f59e0b);
+}
+
+.counterDanger {
+  color: var(--si-color-danger, #ef4444);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 8px 12px;
+  border-radius: var(--si-radius-sm, 6px);
+  border: 1px solid var(--si-color-neutral-300, #cbd5e1);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  color: var(--si-color-neutral-900, #0f172a);
+  outline: none;
+  box-sizing: border-box;
+  resize: vertical;
+  line-height: 1.45;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.textarea:focus {
+  border-color: var(--si-color-primary, #0066cc);
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.15);
+}
+
+/* Barra de progresso visual de preenchimento ideal (120 - 160 caracteres) */
+.progressBarTrack {
+  width: 100%;
+  height: 4px;
+  background-color: var(--si-color-neutral-200, #e2e8f0);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  transition: width 0.2s ease, background-color 0.2s ease;
+  border-radius: 2px;
+}
+
+.helpText {
+  font-size: 0.75rem;
+  color: var(--si-color-neutral-600, #64748b);
+  margin: 0;
+}

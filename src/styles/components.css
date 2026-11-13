@@ -1,0 +1,992 @@
+/**
+ * Saúde Insider — primitivos compartilhados.
+ *
+ * Elementos que não pertencem a nenhuma área do site: aparecem no cabeçalho,
+ * na home, na editoria e na matéria. Estavam no `home.css`, que só é
+ * enfileirado sob `is_front_page()`, então qualquer página nova renderizava
+ * sem eles. O `.si-icon path` vinha do `header.css` pelo mesmo motivo às
+ * avessas: é primitivo, não é do cabeçalho.
+ *
+ * Escopo deliberadamente pequeno — só chapéu, linha de metadados e ícone.
+ * Card, grade e item de lista continuam no `home.css`: a página de Matéria
+ * confirma o reúso deles, mas a extração é maior e vai em passo separado.
+ *
+ * ⚠️ Foge da convenção "um arquivo por área do site" do CLAUDE.md: aqui o
+ * recorte é por componente. É a exceção que torna o reúso possível.
+ *
+ * @package SaudeInsider
+ */
+
+/* =====================================================================
+ * ÍCONE
+ * ===================================================================== */
+
+/*
+ * Os SVGs vêm do Figma com stroke fixo. A regra abaixo tem precedência sobre
+ * o atributo de apresentação, o que deixa a cor sob controle dos tokens.
+ */
+.si-icon path {
+	stroke: currentColor;
+}
+
+/* =====================================================================
+ * CHAPÉU
+ * ===================================================================== */
+
+.si-kicker {
+	margin-bottom: var(--si-space-2);
+	color: var(--si-color-brand-primary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+}
+
+/* Variante menor, usada dentro dos itens de lista. */
+/*
+ * O chapéu abre a matéria, como o título e a foto.
+ *
+ * ⚠️ Herda tudo: o link não deve mudar a aparência do chapéu. O que ele
+ * acrescenta é só o alvo de clique e um sublinhado no hover, para o cursor
+ * confirmar que ali há link — a cor da marca já é a mesma dos links do tema, e
+ * pintá-lo de novo não diria nada.
+ */
+.si-kicker__link {
+	color: inherit;
+	text-decoration: none;
+}
+
+.si-kicker__link:hover,
+.si-kicker__link:focus-visible {
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.si-kicker--item {
+	font-size: var(--si-font-size-label-sm);
+}
+
+/* =====================================================================
+ * LINHA DE METADADOS
+ * ===================================================================== */
+
+.si-meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--si-space-2);
+	color: var(--si-color-text-tertiary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+}
+
+.si-meta a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.si-meta a:hover {
+	color: var(--si-color-text-link);
+	text-decoration: underline;
+}
+
+/* Separador entre data e autor — pontuação, não conteúdo. */
+.si-meta__autor::before {
+	content: "·";
+	margin-right: var(--si-space-2);
+}
+
+/*
+ * Botão de áudio, encostado à direita da linha de metadados.
+ *
+ * Sem comportamento por enquanto: sai com aria-disabled, então leitores de
+ * tela o anunciam como indisponível em vez de prometerem uma ação que não
+ * existe. O gancho para o futuro é [data-si-audio].
+ */
+.si-meta__audio {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	/* margin-left auto encosta na direita mesmo com data e autor variáveis. */
+	margin-left: auto;
+	padding: 0;
+	border: 0;
+	background: none;
+	/*
+	 * Um tom mais claro que a data ao lado, como no frame: os vetores do
+	 * ícone saem em #9A9A96 na grade de destaques e #888888 na manchete —
+	 * o token de ícone secundário cobre o primeiro exatamente e o segundo
+	 * por aproximação (não há token para #888888).
+	 */
+	color: var(--si-color-icon-muted);
+	cursor: pointer;
+}
+
+/*
+ * O ícone tem 18px, como no Figma, mas a área clicável é ampliada para 44x44
+ * por um pseudo-elemento — assim o alvo de toque atende o mínimo sem inflar
+ * a altura da linha de metadados.
+ */
+.si-meta__audio::after {
+	content: "";
+	position: absolute;
+	inset: -13px;
+}
+
+.si-meta__audio:hover {
+	color: var(--si-color-icon-active);
+}
+
+.si-meta__audio .si-icon {
+	display: block;
+	width: 18px;
+	height: 18px;
+}
+
+/* =====================================================================
+ * CABEÇALHO DE SEÇÃO
+ * ===================================================================== */
+
+.si-section-header__titulo {
+	padding-bottom: var(--si-space-2);
+	/* Fio grosso do Figma: #111, não o cinza dos separadores. */
+	border-bottom: 1px solid var(--si-color-border-strong);
+	font-size: var(--si-font-size-h3);
+	font-weight: var(--si-font-weight-h3);
+	line-height: var(--si-line-height-h3);
+	letter-spacing: var(--si-letter-spacing-h3);
+}
+
+/* =====================================================================
+ * CHAMADA (card)
+ * ===================================================================== */
+
+/*
+ * Desenho do fio que separa uma chamada da seguinte. Fica no card, e não no
+ * bloco, porque a manchete e a grade de destaques usam o mesmo separador —
+ * cada bloco só decide de que lado aplicar, já que numa pilha ele vem embaixo
+ * e numa grade vem em cima da linha seguinte.
+ */
+.si-card {
+	--si-card-fio: 1px solid var(--si-color-border-subtle);
+	--si-card-respiro: var(--si-space-6);
+}
+
+.si-card__media {
+	display: block;
+	margin-bottom: var(--si-space-2);
+}
+
+/*
+ * 3:2 vem do Figma (542x361). Fixar a proporção no CSS elimina deslocamento
+ * de layout mesmo antes de a imagem baixar.
+ */
+.si-card__img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+	background-color: var(--si-color-surface-muted);
+}
+
+.si-card__titulo {
+	font-size: var(--si-font-size-h6);
+	font-weight: var(--si-font-weight-h6);
+	line-height: var(--si-line-height-h6);
+	letter-spacing: var(--si-letter-spacing-h6);
+}
+
+.si-card__titulo a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.si-card__titulo a:hover {
+	color: var(--si-color-text-link);
+}
+
+.si-card__meta {
+	margin-top: var(--si-space-2);
+}
+
+/* =====================================================================
+ * GRADE DE CHAMADAS (componente "Destaques")
+ * =====================================================================
+ * Grade uniforme, sem manchete. Reflui de 1 para 2 e depois para o número de
+ * colunas pedido pelo bloco.
+ *
+ * Os fios entre linhas são borda superior a partir da segunda linha, e não
+ * borda inferior até a penúltima: assim a regra vale para qualquer quantidade
+ * de itens, inclusive quando a última linha fica incompleta. O resultado em
+ * pixels é o mesmo do Figma, que usa stroke inferior com 24px de respiro.
+ */
+
+.si-grid__wrap {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-6);
+	max-width: var(--si-container-max);
+	margin-inline: auto;
+	padding-block: var(--si-space-6);
+}
+
+/* Fio que fecha o bloco, recuado como no Figma. */
+.si-grid__wrap::after {
+	content: "";
+	height: 1px;
+	margin-inline: var(--si-container-gutter);
+	background-color: var(--si-color-border-default);
+}
+
+.si-grid__inner {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	/*
+	 * Sem espaço entre linhas, de propósito: é o que mantém o fio vertical
+	 * contínuo de uma linha para a outra, como a régua única de 659px do
+	 * Figma. O respiro entre chamadas vem do padding do próprio card.
+	 */
+	row-gap: 0;
+}
+
+.si-grid .si-card {
+	position: relative;
+	padding-inline: var(--si-container-gutter);
+	/*
+	 * Também na última linha: é este respiro que faz o fio vertical terminar
+	 * 24px antes do fio que fecha o bloco, em vez de encostar nele.
+	 */
+	padding-bottom: var(--si-card-respiro);
+
+	/*
+	 * Coluna flexível para a data poder ser empurrada ao pé — ver
+	 * `.si-grid .si-card__meta`. O cartão já ocupa a altura toda da linha da
+	 * grade, porque `align-items` é `stretch` por padrão.
+	 */
+	display: flex;
+	flex-direction: column;
+}
+
+/*
+ * Três linhas reservadas para o título, mesmo quando ele tem duas.
+ *
+ * Pedido do cliente em 25/08/2026: "considerar que as matérias sempre vão ter
+ * 3 linhas de escrito". Sem a reserva, uma chamada curta encolhe a própria
+ * linha da grade e o bloco fica com dois pés diferentes.
+ *
+ * ⚠️ `min-height` e não `height`: título de QUATRO linhas continua cabendo. O
+ * acervo tem um — medido em 25/08/2026, o cartão 4 da primeira linha. Com
+ * `height` ele seria cortado.
+ */
+.si-grid .si-card__titulo {
+	min-height: calc(3 * var(--si-line-height-h6) * var(--si-font-size-h6));
+}
+
+/*
+ * A data vai para o pé do cartão, e é isto que alinha todas as da linha.
+ *
+ * ⚠️ A reserva de três linhas acima NÃO basta sozinha: o chapéu também quebra
+ * em duas linhas em alguns cartões, e o título de quatro linhas existe. Medido
+ * antes: oito cartões, **seis** alturas de data diferentes — 1505, 1511, 1523,
+ * 1551, 1861 e 1879. O que garante o alinhamento é o `auto`, que come toda a
+ * sobra qualquer que seja ela; a reserva das três linhas é que mantém as duas
+ * LINHAS da grade com a mesma altura.
+ */
+.si-grid .si-card__meta {
+	margin-top: auto;
+}
+
+/*
+ * Fio horizontal desenhado como pseudo-elemento recuado nas duas pontas.
+ *
+ * No Figma ele tem a largura do card (244px), não a da coluna (292px), e para
+ * 28px antes do fio vertical — os dois nunca se tocam. Uma borda no card
+ * ocuparia a célula inteira, incluindo o padding, e formaria uma cruz.
+ *
+ * Fica declarado aqui e é ligado por breakpoint com content, para o desenho
+ * não se repetir em cada media query.
+ */
+.si-grid .si-card::before {
+	content: none;
+	position: absolute;
+	top: 0;
+	left: var(--si-container-gutter);
+	right: var(--si-container-gutter);
+	height: 1px;
+	background-color: var(--si-color-border-subtle);
+}
+
+/* Uma coluna: fio acima de toda chamada a partir da segunda. */
+.si-grid .si-card:nth-child(n + 2) {
+	padding-top: var(--si-card-respiro);
+}
+
+.si-grid .si-card:nth-child(n + 2)::before {
+	content: "";
+}
+
+/* =====================================================================
+ * ITEM DE LISTA
+ * ===================================================================== */
+
+/*
+ * flex-wrap para a variante compacta com foto: a imagem ocupa uma linha
+ * inteira e o par marcador + texto desce para a seguinte.
+ */
+.si-item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: var(--si-space-1);
+}
+
+/*
+ * Fio entre itens, com o mesmo desenho do card. O respiro depois do fio
+ * difere por lista: 24px nas compactas e 16px na de mídia, como no Figma.
+ */
+.si-item:not(:last-child) {
+	padding-bottom: var(--si-space-4);
+	margin-bottom: var(--si-space-6);
+	border-bottom: var(--si-card-fio, 1px solid var(--si-color-border-subtle));
+}
+
+.si-item--media {
+	gap: var(--si-space-2);
+}
+
+/*
+ * Foto ao lado do texto: a data desce até o pé da foto.
+ *
+ * Pedido do cliente em 25/08/2026, para todo layout com esta forma — hoje as
+ * cinco chamadas do "Leia também" e as cinco do bloco de podcast.
+ *
+ * ⚠️ Antes a data vinha logo abaixo do título, e sobrava um degrau que variava
+ * com o número de linhas: medido nos 10 itens, a data terminava de **19 a
+ * 62px acima** do pé da foto — 19px com título de três linhas, 62px com
+ * título de uma.
+ *
+ * O corpo já estica até a altura do item (o `flex` alinha por `stretch`), e é
+ * a foto que manda nessa altura. Falta só a linha de metadados encostar no
+ * fundo do corpo: o `auto` come a sobra, qualquer que seja ela.
+ *
+ * ⚠️ O `margin-top` de `--si-space-2` da regra geral vira mínimo, para o caso
+ * em que o título é alto o bastante para não haver sobra — sem ele a data
+ * colaria no título.
+ */
+.si-item--media .si-item__corpo {
+	display: flex;
+	flex-direction: column;
+	/*
+	 * ⚠️ `align-self`, e é a peça que faltava. O item alinha por `flex-start`,
+	 * então o corpo parava na altura do próprio conteúdo — 111px contra 130 da
+	 * foto — e o `margin-top: auto` abaixo não tinha sobra nenhuma para
+	 * consumir. Medido em 25/08/2026: sem esta linha, a correção não mudava
+	 * um pixel.
+	 *
+	 * Só no corpo, e não com `align-items: stretch` no item: ali a regra
+	 * alcançaria também a foto, e esticar o link dela não tem propósito.
+	 */
+	align-self: stretch;
+}
+
+.si-item--media .si-item__meta {
+	margin-top: auto;
+	padding-top: var(--si-space-2);
+}
+
+.si-item--media:not(:last-child) {
+	margin-bottom: var(--si-space-4);
+}
+
+.si-item__corpo {
+	flex: 1;
+	min-width: 0;
+}
+
+/* Marcador de 20px: bolinha nas recomendadas, número nas mais lidas. */
+.si-item__marcador {
+	display: flex;
+	flex: 0 0 20px;
+	align-items: center;
+	justify-content: center;
+	height: 20px;
+	color: var(--si-color-brand-primary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+}
+
+/*
+ * Marcador de episódio: quadrado vinho com o ícone de áudio em branco.
+ */
+.si-item__marcador--icon {
+	color: var(--si-color-brand-on-primary);
+	background-color: var(--si-color-brand-primary);
+}
+
+.si-item__marcador--icon .si-icon {
+	width: 12px;
+	height: 12px;
+}
+
+.si-item__marcador--icon .si-icon path {
+	stroke: currentColor;
+}
+
+.si-item__marcador--bullet::before {
+	content: "";
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background-color: currentColor;
+}
+
+/*
+ * Foto lateral da variante com mídia. 35% reproduz a proporção do Figma
+ * (191px numa linha de 544) — foi o 40% anterior que deixava a coluna central
+ * mais alta que as outras duas.
+ */
+.si-item__media {
+	display: block;
+	flex: 0 0 35%;
+}
+
+/*
+ * Na variante compacta a foto ocupa a linha inteira, acima do texto. É o
+ * formato do último item de "Mais lidas".
+ */
+.si-item--compact .si-item__media {
+	flex: 0 0 100%;
+}
+
+/*
+ * A margem separa a foto do texto quando ela ocupa a linha inteira, e por isso
+ * só vale na variante compacta. Na de mídia foto e texto são lado a lado: ali
+ * a margem virava 8px mortos embaixo de cada item, e cinco deles esticavam a
+ * coluna central bem além da altura do frame.
+ */
+.si-item--compact.si-item--foto-before .si-item__media {
+	order: -1;
+	margin-bottom: var(--si-space-2);
+}
+
+/*
+ * Foto abaixo do texto: é a ordem do item de podcast no Figma, onde o respiro
+ * entre um e outro é de 16px — vem do padding do bloco de texto, não de um gap.
+ */
+.si-item--compact.si-item--foto-after .si-item__media {
+	order: 1;
+	margin-top: var(--si-space-4);
+}
+
+.si-item__img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+	background-color: var(--si-color-surface-muted);
+}
+
+.si-item__titulo {
+	font-size: var(--si-font-size-h6);
+	font-weight: var(--si-font-weight-h6);
+	line-height: var(--si-line-height-h6);
+	letter-spacing: var(--si-letter-spacing-h6);
+}
+
+/* Na variante com mídia o título é maior — 18px/21,3 no frame, token próprio. */
+.si-item--media .si-item__titulo {
+	font-size: var(--si-font-size-item-media);
+	font-weight: var(--si-font-weight-h5);
+	line-height: var(--si-line-height-item-media);
+}
+
+.si-item__titulo a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.si-item__titulo a:hover {
+	color: var(--si-color-text-link);
+}
+
+.si-item__meta {
+	margin-top: var(--si-space-2);
+}
+
+/* =====================================================================
+ * RESPONSIVO
+ * =====================================================================
+ * Breakpoints repetidos literalmente (480, 1024): custom properties não
+ * funcionam dentro de @media.
+ */
+
+@media (min-width: 480px) {
+	/* Duas colunas: fio vertical na coluna par, horizontal da 3ª chamada em diante. */
+	.si-grid__inner {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.si-grid .si-card:nth-child(n + 2) {
+		padding-top: 0;
+	}
+
+	.si-grid .si-card:nth-child(n + 2)::before {
+		content: none;
+	}
+
+	.si-grid .si-card:nth-child(n + 3) {
+		padding-top: var(--si-card-respiro);
+	}
+
+	.si-grid .si-card:nth-child(n + 3)::before {
+		content: "";
+	}
+
+	.si-grid .si-card:nth-child(2n) {
+		border-left: 1px solid var(--si-color-border-default);
+	}
+}
+
+@media (min-width: 1024px) {
+	/*
+	 * Grade de quatro colunas do Figma. O fio vertical vai em toda chamada que
+	 * não abre linha; o horizontal, da segunda linha em diante.
+	 */
+	.si-grid--cols-4 .si-grid__inner {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+
+	.si-grid--cols-4 .si-card:nth-child(n + 3) {
+		padding-top: 0;
+	}
+
+	.si-grid--cols-4 .si-card:nth-child(n + 3)::before {
+		content: none;
+	}
+
+	.si-grid--cols-4 .si-card:nth-child(n + 5) {
+		padding-top: var(--si-card-respiro);
+	}
+
+	.si-grid--cols-4 .si-card:nth-child(n + 5)::before {
+		content: "";
+	}
+
+	.si-grid--cols-4 .si-card {
+		border-left: 0;
+	}
+
+	.si-grid--cols-4 .si-card:not(:nth-child(4n + 1)) {
+		border-left: 1px solid var(--si-color-border-default);
+	}
+}
+
+/* =====================================================================
+ * ARTICLE ROW
+ * =====================================================================
+ * Linha de notícia dos arquivos (Editoria e Cúpula) e das recirculações da
+ * matéria: texto à esquerda, foto 3:2 à direita. Medidas do frame 122:1727
+ * (rows 123:3017…): coluna de texto com gap 8, foto de 292x195, gap 24,
+ * respiro vertical 24 e fio inferior --si-color-border-default — um tom mais
+ * forte que o fio dos si-item, e é assim no frame.
+ *
+ * Difere do si-item--media em cinco pontos estruturais (foto à direita,
+ * linha fina presente, sem chapéu, fio default, respiro 24) — por isso é
+ * componente próprio e não variante.
+ */
+
+.si-row {
+	display: flex;
+	flex-direction: column;
+	gap: var(--si-space-4);
+	padding-block: var(--si-space-6);
+}
+
+.si-row:not(:last-child) {
+	border-bottom: 1px solid var(--si-color-border-default);
+}
+
+.si-row__corpo {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	gap: var(--si-space-2);
+}
+
+.si-row__titulo {
+	font-size: var(--si-font-size-item-media);
+	font-weight: var(--si-font-weight-h5);
+	line-height: var(--si-line-height-item-media);
+	letter-spacing: var(--si-letter-spacing-h5);
+}
+
+.si-row__titulo a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.si-row__titulo a:hover {
+	color: var(--si-color-text-link);
+}
+
+/*
+ * Linha fina da linha de arquivo. Cor um degrau acima da manchete: aqui o frame
+ * pinta #3f3f3f. Clamp de 3 linhas segura o fallback para excerpt sem estourar
+ * a altura da row.
+ *
+ * ⚠️ SERIFADA, e não a sans do corpo — pedido do cliente em 04/09/2026: "o
+ * texto abaixo do título também precisa ser com a mesma fonte com serifa". É a
+ * mesma `--si-font-serif` do título logo acima, e o mesmo caminho que a linha
+ * fina da MATÉRIA já tinha percorrido no `L2-03`.
+ *
+ * ⚠️ Ela reusava os tokens de subheadline (18px/1.45), e isso a deixava MAIOR
+ * que o título abaixo de 1024px, onde o título cai para 16px. Medido em
+ * 04/09/2026: título 16px contra linha fina 18px em 375 e em 768.
+ *
+ * ⚠️ **FECHA A DIVERGÊNCIA #3** do CLAUDE.md, que registrava o frame pedindo
+ * serifada 16px/1.6 e o tema reusando o token da manchete. O pedido do cliente
+ * devolve o componente ao frame — é convergência, não um terceiro caminho.
+ */
+.si-row__linha-fina {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+	font-family: var(--si-font-serif);
+	color: var(--si-color-text-secondary);
+	font-size: var(--si-font-size-row-standfirst);
+	font-weight: var(--si-font-weight-subheadline);
+	font-style: var(--si-font-style-subheadline);
+	line-height: var(--si-line-height-row-standfirst);
+}
+
+/* A data ancora na base da row, alinhada à base da foto, como no frame. */
+.si-row__meta {
+	margin-top: auto;
+}
+
+.si-row__media {
+	display: block;
+	flex: 0 0 auto;
+}
+
+.si-row__img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+	background-color: var(--si-color-surface-muted);
+}
+
+/* A partir do tablet a foto vai para a direita, na largura fixa do frame. */
+@media (min-width: 768px) {
+	.si-row {
+		flex-direction: row;
+		gap: var(--si-space-6);
+	}
+
+	/* A foto entra depois do texto no markup e à direita no visual. */
+	.si-row__media {
+		width: 292px;
+		order: 2;
+	}
+}
+
+/*
+ * Assinatura da linha de arquivo.
+ *
+ * Só aparece nas landings de coluna assinada (o argumento `byline` do
+ * ArticleRow). Fica entre o título e a linha fina, que é a ordem de leitura
+ * de um jornal: o que é, quem assina, do que trata.
+ */
+.si-row__byline {
+	margin: 0;
+	color: var(--si-color-text-tertiary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+}
+
+.si-row__byline a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.si-row__byline a:hover {
+	color: var(--si-color-text-link);
+	text-decoration: underline;
+}
+
+/* =====================================================================
+ * VÍDEO E ÁUDIO NO CARTÃO (L3-09)
+ * =====================================================================
+ * Só existe no cartão que tem mídia — os demais não ganham uma regra sequer.
+ */
+
+/*
+ * Âncora da capa de vídeo. Os três lugares que mostram miniatura usam a mesma
+ * capa (`.si-midia--video`), que é `position: absolute` — então os três
+ * precisam do contexto de posicionamento.
+ *
+ * ⚠️ As duas últimas entraram em 04/09/2026, quando o vídeo passou a valer
+ * "em todas as situações": antes só o cartão da home tinha capa, e a editoria
+ * mostrava a imagem destacada como se a matéria não tivesse vídeo.
+ */
+.si-card__media-area,
+.si-row__media-area,
+.si-item__media-area {
+	position: relative;
+}
+
+/*
+ * ⚠️ A miniatura do YouTube chega em 1280x720 (16:9) e ocupa um espaço
+ * desenhado para 3:2. O `object-fit: cover` das classes de imagem já recorta,
+ * mas o `width`/`height` do atributo precisa ser neutralizado — senão o
+ * navegador reserva 16:9 e a linha pula de altura quando a imagem chega.
+ */
+.si-card__img,
+.si-row__img,
+.si-item__img {
+	width: 100%;
+	height: auto;
+}
+
+/*
+ * Capa do vídeo: o play sobre a foto destacada.
+ *
+ * ⚠️ Cobre a foto INTEIRA em vez de ser um botão pequeno num canto: o alvo
+ * fica grande no toque sem precisar de medida especial, e a foto de uma
+ * matéria de vídeo é a capa dele, não uma ilustração ao lado.
+ */
+.si-midia--video {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/*
+	 * ⚠️ `inset: 0` cobre a foto EXATAMENTE. Houve aqui um `bottom` de 8px,
+	 * para descontar a margem do link da foto — mas essa margem não entra na
+	 * altura do invólucro (ela transborda, porque o invólucro não abre contexto
+	 * de formatação). O desconto deixava a capa 8px mais curta que a imagem.
+	 * Medido em 25/08/2026: capa de 160px sobre foto de 168px.
+	 */
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+}
+
+.si-midia__play {
+	display: block;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background-color: var(--si-color-overlay-veil);
+	box-shadow: var(--si-shadow-drawer);
+}
+
+/*
+ * O triângulo é desenhado com bordas — sem ícone novo, e sem depender de
+ * arquivo que o designer ainda não entregou.
+ */
+.si-midia__play::after {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 0;
+	height: 0;
+	border-top: 10px solid transparent;
+	border-bottom: 10px solid transparent;
+	border-left: 16px solid var(--si-color-brand-primary);
+	content: "";
+	/* O -40% desloca para o centro ÓPTICO: o triângulo tem massa à esquerda. */
+	transform: translate(-40%, -50%);
+}
+
+.si-midia--video:hover .si-midia__play,
+.si-midia--video:focus-visible .si-midia__play {
+	background-color: var(--si-color-surface-overlay);
+}
+
+/* Trocada pelo iframe do provedor no clique — ver navigation.js. */
+.si-midia__frame {
+	display: block;
+	width: 100%;
+	aspect-ratio: 3 / 2;
+	border: 0;
+}
+
+/*
+ * Áudio: toca no próprio cartão, sem capa. `<audio>` nativo não custa quase
+ * nada e não envolve terceiro — não há razão para adiar o carregamento como se
+ * faz com o vídeo.
+ */
+.si-midia--audio {
+	margin-bottom: var(--si-space-2);
+}
+
+.si-midia__audio {
+	display: block;
+	width: 100%;
+	height: 32px;
+}
+
+/* =====================================================================
+ * AVISO DE "LINK COPIADO"
+ * =====================================================================
+ * Balão que aparece ao lado do botão de copiar, por ~2,4s. Pedido do cliente em
+ * 04/09/2026: "quando clicar nele, precisa ter uma mensagem 'Link Copiado' para
+ * ele saber que foi copiado".
+ *
+ * ⚠️ O TEXTO VEM DO MARKUP, por `attr(data-si-copied)` — o mesmo atributo que o
+ * JavaScript já usava para o anúncio em leitor de tela. Assim a mensagem é
+ * traduzível pelo PHP e não existe string de interface dentro do CSS nem do JS.
+ *
+ * ⚠️ Vive em `components.css` porque o botão existe em DOIS lugares com donos
+ * diferentes: o trilho da matéria (`single.css`) e o rodapé (`footer.css`).
+ * Duplicar a regra faria os dois divergirem na primeira correção.
+ *
+ * ⚠️ USA `::before`, e NÃO `::after`. O `::after` de `.si-article__acao` já é o
+ * ampliador de alvo de toque (`inset: -4px`, os 44px em cima de um botão de 36),
+ * e as duas regras têm a MESMA especificidade — quem viesse depois na ordem de
+ * carregamento venceria. Como `single.css` depende de `components.css`, ele vem
+ * depois e o balão simplesmente não aparecia: 44x44 e conteúdo vazio, medido.
+ * `::before` está livre nos dois botões.
+ */
+
+.si-acao--copiado {
+	position: relative;
+}
+
+.si-acao--copiado::before {
+	content: attr(data-si-copied);
+	position: absolute;
+	/*
+	 * ⚠️ ABAIXO do botão, não ao lado nem acima.
+	 *
+	 * Ao lado sai errado nas duas pontas: no trilho da matéria o botão fica a
+	 * 16px da borda da tela nas larguras intermediárias, então à esquerda o
+	 * balão sairia do viewport e à direita cairia sobre o texto.
+	 *
+	 * Acima foi a primeira tentativa, e cobria o ícone de e-mail do trilho
+	 * durante os 2,4s — visto na medição. O botão de copiar é o ÚLTIMO tanto no
+	 * trilho quanto no rodapé, e abaixo dele não há nada em nenhum dos dois.
+	 *
+	 * ⚠️ Se algum dia entrar botão DEPOIS do de copiar, esta escolha deixa de
+	 * valer e o balão passa a cobri-lo.
+	 */
+	top: calc(100% + var(--si-space-2));
+	left: 50%;
+	z-index: 3;
+	padding: var(--si-space-1) var(--si-space-3);
+	border-radius: 2px;
+	background-color: var(--si-color-surface-inverse);
+	color: var(--si-color-brand-on-primary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-caption);
+	line-height: var(--si-line-height-caption);
+	/* Sem isto o balão quebra em duas linhas dentro dos 36px do botão. */
+	white-space: nowrap;
+	transform: translateX(-50%);
+	/* O balão é aviso, não alvo: clique atravessa. */
+	pointer-events: none;
+}
+
+/* No rodapé o fundo é escuro, então o balão inverte para continuar legível. */
+.si-footer__rede.si-acao--copiado::before {
+	background-color: var(--si-color-surface-page);
+	color: var(--si-color-text-primary);
+}
+
+/* =====================================================================
+ * PAGINAÇÃO (`.si-paginacao`)
+ * =====================================================================
+ * Componente compartilhado desde o `T-27` (28/09/2026): o pé da Sub Home e
+ * da busca e, agora, o pé da matéria, abaixo do "Mais em {editoria}". Até
+ * então vivia no archive.css como `.si-arquivo__paginacao`, que só carrega em
+ * arquivo e busca — e a matéria precisava do MESMO desenho, por pedido
+ * explícito do cliente ("no mesmo padrão que aparece no pé das Sub Homes").
+ *
+ * Só o desenho mora aqui. Largura e posição são de quem usa: o arquivo
+ * centraliza em 792px (archive.css), a matéria encaixa na coluna da
+ * recirculação (single.css).
+ *
+ * O frame mostra 10 notícias e nenhum pager — o desenho é derivado dos
+ * tokens (fio + labels) e está registrado como pendência para o designer.
+ */
+
+.si-paginacao .nav-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--si-space-2);
+	align-items: center;
+	justify-content: center;
+	padding-top: var(--si-space-4);
+	border-top: 1px solid var(--si-color-border-default);
+}
+
+/*
+ * 44x44 de alvo mínimo com a tipografia de label — acessibilidade vence o
+ * tamanho miúdo que o 11px sugeriria para o botão inteiro.
+ */
+.si-paginacao .page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	min-height: 44px;
+	padding-inline: var(--si-space-2);
+	color: var(--si-color-text-tertiary);
+	font-family: var(--si-font-sans);
+	font-size: var(--si-font-size-label);
+	font-weight: var(--si-font-weight-label);
+	line-height: var(--si-line-height-label);
+	letter-spacing: var(--si-letter-spacing-label);
+	text-transform: var(--si-text-transform-label);
+	text-decoration: none;
+}
+
+.si-paginacao a.page-numbers:hover,
+.si-paginacao a.page-numbers:focus-visible {
+	color: var(--si-color-text-link);
+}
+
+/*
+ * Página corrente em vinho; o aria-current já vem do core. No pé da matéria
+ * não há corrente — ali nenhum número é a página em que o leitor está.
+ */
+.si-paginacao .page-numbers.current {
+	color: var(--si-color-brand-primary);
+}
+
+/*
+ * O core emite .screen-reader-text no h2 interno da paginação e o tema não
+ * carrega nenhum CSS padrão que a esconda — mesma receita do
+ * .si-visually-hidden de main.css.
+ */
+.si-paginacao .screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	white-space: nowrap;
+	border: 0;
+	clip-path: inset(50%);
+}

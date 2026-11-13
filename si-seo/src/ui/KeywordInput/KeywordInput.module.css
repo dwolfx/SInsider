@@ -1,0 +1,137 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--si-color-neutral-800, #1e293b);
+}
+
+.highlightButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border-radius: var(--si-radius-sm, 4px);
+  border: 1px solid var(--si-color-neutral-300, #cbd5e1);
+  background-color: #ffffff;
+  color: var(--si-color-neutral-700, #334155);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.highlightButton:hover {
+  background-color: var(--si-color-neutral-100, #f1f5f9);
+  border-color: var(--si-color-neutral-400, #94a3b8);
+}
+
+.highlightButtonActive {
+  background-color: #fef08a;
+  border-color: #facc15;
+  color: #854d0e;
+}
+
+.btnIcon {
+  width: 13px;
+  height: 13px;
+  color: currentColor;
+}
+
+.input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--si-radius-sm, 6px);
+  border: 1px solid var(--si-color-neutral-300, #cbd5e1);
+  font-size: 0.875rem;
+  color: var(--si-color-neutral-900, #0f172a);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  border-color: var(--si-color-primary, #0066cc);
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+}
+
+.helpText {
+  font-size: 0.75rem;
+  color: var(--si-color-neutral-600, #64748b);
+  margin: 0;
+}
+
+/* Sugestões múltiplas de palavras-chave baseadas no título */
+.suggestionsBox {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background-color: var(--si-color-neutral-50, #f8fafc);
+  border: 1px solid var(--si-color-neutral-200, #e2e8f0);
+  border-radius: var(--si-radius-sm, 6px);
+  padding: 8px 10px;
+}
+
+.suggestionsTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--si-color-neutral-700, #334155);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sparkIcon {
+  width: 13px;
+  height: 13px;
+  color: var(--si-color-primary, #0066cc);
+}
+
+.pillsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.suggestionPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: #ffffff;
+  color: var(--si-color-neutral-800, #1e293b);
+  border: 1px solid var(--si-color-neutral-300, #cbd5e1);
+  border-radius: var(--si-radius-full, 9999px);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.suggestionPill:hover {
+  background-color: #eff6ff;
+  border-color: var(--si-color-primary, #0066cc);
+  color: var(--si-color-primary, #0066cc);
+}
+
+.pillTagIcon {
+  width: 11px;
+  height: 11px;
+  color: currentColor;
+}
