@@ -1,155 +1,128 @@
 <?php
 /**
- * Plugin Name: SI-SEO (Saúde Insider SEO)
- * Plugin URI:  https://saudeinsider.com.br
- * Description: Plugin de SEO profissional com análise em tempo real, legibilidade Flesch PT, pontuação dinâmica, playground de testes e geração segura de meta tags para o Saúde Insider.
+ * Plugin Name: SI-SEO (Saúde Insider SEO Engine)
+ * Plugin URI:  https://saudeinsider.com.br/
+ * Description: Motor de SEO e Linter de Conteúdo em Tempo Real para Gutenberg e React com suporte nativo a NewsArticle.
  * Version:     1.0.0
- * Author:      Victor Padilla & Maya
- * Author URI:  https://saudeinsider.com.br
+ * Author:      Victor Hugo & Maya
+ * Author URI:  https://saudeinsider.com.br/
  * Text Domain: si-seo
- * Requires at least: 5.8
- * Requires PHP: 7.4
- * License:     GPL-2.0-or-later
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-    exit; // Segurança: bloqueia execução direta de arquivo
+if (!defined('ABSPATH')) {
+    exit;
 }
 
-// Constantes globais do plugin
-if ( ! defined( 'SI_SEO_VERSION' ) ) {
-    define( 'SI_SEO_VERSION', '1.0.0' );
-}
-if ( ! defined( 'SI_SEO_PLUGIN_DIR' ) ) {
-    define( 'SI_SEO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-}
-if ( ! defined( 'SI_SEO_PLUGIN_URL' ) ) {
-    define( 'SI_SEO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-}
-if ( ! defined( 'SI_SEO_PLUGIN_BASENAME' ) ) {
-    define( 'SI_SEO_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
-}
-
-/**
- * Carregador principal do plugin em padrão Singleton defensivo.
- * Garante isolamento total e tratamento de erros sem risco de crash no WordPress.
- */
-final class SI_SEO_Plugin {
-
-    /**
-     * Instância única
-     * @var SI_SEO_Plugin|null
-     */
-    private static $instance = null;
-
-    /**
-     * Retorna a instância única
-     * @return SI_SEO_Plugin
-     */
-    public static function get_instance() {
-        if ( null === self::$instance ) {
-            self::$instance = new self();
-        }
-        return self::$instance;
+class SiSeoPlugin {
+    public function __construct() {
+        add_action('init', [$this, 'register_meta_fields']);
+        add_action('enqueue_block_editor_assets', [$this, 'enqueue_editor_assets']);
+        add_action('wp_head', [$this, 'render_frontend_meta'], 1);
     }
 
     /**
-     * Construtor protegido
+     * Registra os meta fields na REST API para o React / Gutenberg ler e salvar com segurança
      */
-    private function __construct() {
-        $this->load_dependencies();
-        $this->init_hooks();
-    }
+    public function register_meta_fields() {
+        $meta_fields = [
+            '_si_seo_focus_keyword' => 'string',
+            '_si_seo_title'         => 'string',
+            '_si_seo_meta_desc'     => 'string',
+            '_yoast_wpseo_focuskw'  => 'string',
+            '_yoast_wpseo_title'    => 'string',
+            '_yoast_wpseo_metadesc' => 'string',
+        ];
 
-    /**
-     * Carrega arquivos necessários de forma segura
-     */
-    private function load_dependencies() {
-        $files = array(
-            'includes/icons.php',
-            'includes/class-si-seo-analyzer.php',
-            'includes/class-si-seo-frontend.php',
-            'includes/class-si-seo-metabox.php',
-            'includes/class-si-seo-playground.php',
-            'includes/class-si-seo-api.php',
-        );
-
-        foreach ( $files as $file ) {
-            $filepath = SI_SEO_PLUGIN_DIR . $file;
-            if ( file_exists( $filepath ) ) {
-                require_once $filepath;
-            }
+        foreach ($meta_fields as $key => $type) {
+            register_post_meta('post', $key, [
+                'show_in_rest'  => true,
+                'single'        => true,
+                'type'          => $type,
+                'auth_callback' => function() {
+                    return current_user_can('edit_posts');
+                }
+            ]);
         }
     }
 
     /**
-     * Inicializa os hooks do WordPress com tratamento defensivo
+     * Carrega o script em React dentro do editor Gutenberg
      */
-    private function init_hooks() {
-        // Inicialização dos módulos do painel administrativo
-        if ( is_admin() ) {
-            if ( class_exists( 'SI_SEO_Metabox' ) ) {
-                SI_SEO_Metabox::init();
-            }
-            if ( class_exists( 'SI_SEO_Playground' ) ) {
-                SI_SEO_Playground::init();
-            }
+    public function enqueue_editor_assets() {
+        $has_local_dist = file_exists(plugin_dir_path(__FILE__) . 'dist/si-seo.umd.js');
+        $script_path    = $has_local_dist ? plugin_dir_path(__FILE__) . 'dist/si-seo.umd.js' : plugin_dir_path(__FILE__) . '../dist/si-seo.umd.js';
+        $script_url     = $has_local_dist ? plugins_url('dist/si-seo.umd.js', __FILE__) : plugins_url('../dist/si-seo.umd.js', __FILE__);
+        
+        $style_path     = $has_local_dist ? plugin_dir_path(__FILE__) . 'dist/si-seo.css' : plugin_dir_path(__FILE__) . '../dist/si-seo.css';
+        $style_url      = $has_local_dist ? plugins_url('dist/si-seo.css', __FILE__) : plugins_url('../dist/si-seo.css', __FILE__);
+
+        if (file_exists($script_path)) {
+            wp_enqueue_script(
+                'si-seo-sidebar',
+                $script_url,
+                ['wp-plugins', 'wp-edit-post', 'wp-element', 'wp-components', 'wp-data'],
+                '1.0.0',
+                true
+            );
         }
 
-        // Frontend: Injeção de Meta Tags limpas no <head>
-        if ( class_exists( 'SI_SEO_Frontend' ) ) {
-            SI_SEO_Frontend::init();
+        if (file_exists($style_path)) {
+            wp_enqueue_style(
+                'si-seo-styles',
+                $style_url,
+                [],
+                '1.0.0'
+            );
         }
-
-        // REST API
-        if ( class_exists( 'SI_SEO_API' ) ) {
-            SI_SEO_API::init();
-        }
-
-        // Carregamento de scripts e estilos comuns
-        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
     }
 
     /**
-     * Enfileira assets do admin com verificações de tela
-     * @param string $hook
+     * Injeta meta tags e Schema NewsArticle no front-end para o Google News / Discover
      */
-    public function enqueue_admin_assets( $hook ) {
-        // Enfileira apenas nas telas relevantes (post editor e playground do SI-SEO)
-        $is_post_edit = in_array( $hook, array( 'post.php', 'post-new.php' ), true );
-        $is_playground = ( strpos( $hook, 'si-seo' ) !== false );
-
-        if ( ! $is_post_edit && ! $is_playground ) {
+    public function render_frontend_meta() {
+        if (!is_singular('post')) {
             return;
         }
 
-        // CSS compartilhado
-        wp_enqueue_style(
-            'si-seo-admin-common',
-            SI_SEO_PLUGIN_URL . 'assets/css/admin-common.css',
-            array(),
-            SI_SEO_VERSION
-        );
+        $post_id   = get_the_ID();
+        $title     = get_the_title($post_id);
+        $permalink = get_permalink($post_id);
 
-        // JS do motor de SEO em tempo real
-        wp_enqueue_script(
-            'si-seo-engine',
-            SI_SEO_PLUGIN_URL . 'assets/js/seo-engine.js',
-            array(),
-            SI_SEO_VERSION,
-            true
-        );
+        $meta_desc = get_post_meta($post_id, '_si_seo_meta_desc', true) 
+                  ?: get_post_meta($post_id, '_yoast_wpseo_metadesc', true)
+                  ?: get_the_excerpt($post_id);
+
+        echo "\n<!-- SI-SEO Engine (Saúde Insider) -->\n";
+
+        if (!empty($meta_desc) && !defined('WPSEO_VERSION')) {
+            echo '<meta name="description" content="' . esc_attr($meta_desc) . '" />' . "\n";
+        }
+
+        // Schema JSON-LD NewsArticle estruturado para Google News / Discover
+        $schema = [
+            '@context'         => 'https://schema.org',
+            '@type'            => 'NewsArticle',
+            'headline'         => esc_html($title),
+            'description'      => esc_html($meta_desc),
+            'url'              => esc_url($permalink),
+            'mainEntityOfPage' => [
+                '@type' => 'WebPage',
+                '@id'   => esc_url($permalink),
+            ],
+            'publisher'        => [
+                '@type' => 'NewsMediaOrganization',
+                'name'  => 'Saúde Insider',
+                'url'   => 'https://saudeinsider.com.br/',
+                'logo'  => [
+                    '@type' => 'ImageObject',
+                    'url'   => 'https://saudeinsider.com.br/wp-content/uploads/2026/08/favicon-si-192x192.png',
+                ],
+            ],
+            'inLanguage'       => 'pt-BR',
+        ];
+
+        echo '<script type="application/ld+json">' . json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
     }
 }
 
-// Inicialização segura no hook 'plugins_loaded'
-add_action( 'plugins_loaded', function() {
-    try {
-        SI_SEO_Plugin::get_instance();
-    } catch ( \Throwable $e ) {
-        // Registra erro em log se WP_DEBUG estiver ativo, mas JAMAIS derruba a página
-        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-            error_log( '[SI-SEO Critical Catch]: ' . $e->getMessage() );
-        }
-    }
-} );
+new SiSeoPlugin();
