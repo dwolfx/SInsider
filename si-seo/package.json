@@ -1,37 +1,23 @@
 {
   "name": "si-seo",
   "version": "1.0.0",
-  "description": "Motor de SEO e Linter de Conteúdo em Tempo Real para WordPress (Gutenberg) e React",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "description": "Plugin de SEO profissional e jornalístico para o Saúde Insider",
+  "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "package": "npm run build && powershell -Command \"New-Item -ItemType Directory -Force -Path 'package/si-seo/dist' | Out-Null; Copy-Item 'plugin/si-seo.php' -Destination 'package/si-seo/'; Copy-Item 'dist/*' -Destination 'package/si-seo/dist/'; Compress-Archive -Path 'package/si-seo' -DestinationPath 'si-seo.zip' -Force; Remove-Item -Recurse -Force 'package'\"",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "node --test tests/unit/*.test.js",
+    "test:integration": "node --test tests/integration/*.test.js",
+    "test:all": "npm run test && npm run test:integration",
+    "package": "npm run build && node scripts/package-zip.js"
   },
-  "keywords": [
-    "seo",
-    "wordpress",
-    "gutenberg",
-    "react",
-    "content-analysis",
-    "saude-insider"
-  ],
-  "author": "Victor Hugo & Maya",
-  "license": "MIT",
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@types/node": "^22.10.1",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
-    "typescript": "^5.6.3",
-    "vite": "^6.0.1",
-    "vitest": "^2.1.8"
+    "vite": "^5.4.11"
   }
 }

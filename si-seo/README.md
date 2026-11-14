@@ -1,71 +1,40 @@
-# 🚀 SI-SEO (Saúde Insider SEO Engine)
+# SI-SEO (Saúde Insider SEO) 🚀
 
-Motor de análise on-page e linter de SEO em tempo real desenvolvido especialmente para o **Saúde Insider**. Funciona tanto como um **Plugin nativo do WordPress (Gutenberg)** em React quanto como uma **biblioteca modular de componentes** para aplicações React / Next.js modernas.
-
----
-
-## 🎯 Principais Recursos
-
-- **Score 0 a 100 Dinâmico:** Avaliação em tempo real de boas práticas de ranqueamento.
-- **Leiturabilidade Flesch PT-BR:** Cálculo calibrado especificamente para o idioma português brasileiro.
-- **Prévia SERP do Google (Desktop & Mobile):** Visualização fiel do snippet de pesquisa com contador de caracteres.
-- **Checklist Interativo:** Diagnósticos objetivos de presença de palavra-chave (título, slug, meta descrição, H2/H3, alt de imagens, densidade e introdução).
-- **Retrocompatibilidade com Yoast SEO:** Lê e grava nos mesmos campos de meta (`_yoast_wpseo_*`) para você não perder nada do acervo existente do portal.
-- **Sem Dependência de Tailwind ou CSS Inline:** 100% construído com **CSS Modules** e Design Tokens escaláveis.
+Plugin profissional de SEO on-page, legibilidade Flesch PT e auditoria jornalística para WordPress, desenvolvido especialmente para o **Saúde Insider**.
 
 ---
 
-## 📁 Estrutura do Projeto
+## 🌟 Funcionalidades Principais
 
-```
-C:/sites/si-seo/
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-├── vitest.config.ts
-├── plugin/
-│   └── si-seo.php             # Plugin PHP para ativar dentro do WordPress
-├── src/
-│   ├── styles/
-│   │   └── tokens.module.css  # Design tokens e variáveis visuais
-│   ├── core/                  # Motor de regras determinísticas em TypeScript puro
-│   │   ├── types.ts
-│   │   ├── engine.ts          # Orquestrador do cálculo do score
-│   │   ├── rules/             # Regras isoladas e modulares
-│   │   └── __tests__/         # Suíte de testes unitários 100% em PT-BR
-│   ├── ui/                    # Componentes React reutilizáveis com CSS Modules
-│   │   ├── ScoreBadge/
-│   │   ├── SerpPreview/
-│   │   ├── Checklist/
-│   │   ├── KeywordInput/
-│   │   └── SeoPanel/
-│   └── wordpress/             # Integração com a Sidebar do Gutenberg
-```
+- **Motor em Tempo Real Reativo (React):** Análise instantânea conforme o redator digita ou cola o texto.
+- **Identificador Automático de Palavras-Chave (Chips Clicáveis):** Extrai termos mais fortes do artigo (n-grams) e exibe em tags para seleção com 1 clique.
+- **Tolerância Total a Acentuações:** Normalização avançada em português (`mídia` == `midia`, `ômega 3` == `omega 3`). O destacador grifa preservando os acentos originais no texto.
+- **Drawer Flutuante com Z-Index Alto:** Abre suavemente por cima do editor (`z-index: 99999`), sem quebrar o layout do Gutenberg.
+- **16 Métricas Industriais:** H1, Slug, Meta Descrição, Lead Jornalístico, Densidade, Flesch PT-BR, Frases Curtas, Alt de Imagens, Subtítulos, etc.
+- **Prévia no Google:** SERP Desktop e Mobile com contadores de caracteres (`55/60 carac.` e `106/160 carac.`).
+- **Playground de Teste Dedicado:** Página embutida no wp-admin com presets de notícias reais do Saúde Insider e artigo de Ômega 3.
+- **Zero Risco de Conflito:** Detecta se o Yoast SEO ou Rank Math já está ativo e evita duplicações no `<head>`.
 
 ---
 
-## 🛠️ Comandos Rápidos
+## 📦 Como Instalar no WordPress
+
+1. Baixe o arquivo gerado em: `dist-zip/si-seo.zip` (apenas ~73 KB).
+2. No painel do seu WordPress, vá em **Plugins > Adicionar Novo > Enviar Plugin**.
+3. Selecione o arquivo `si-seo.zip` e clique em **Instalar Agora**.
+4. Clique em **Ativar Plugin**.
+
+---
+
+## 🛠️ Comandos de Desenvolvimento
 
 ```bash
-# Instalar dependências
-npm install
-
-# Rodar todos os testes unitários (Vitest)
-npm run test
-
-# Modo de desenvolvimento
+# Rodar playground de desenvolvimento local (localhost:3333)
 npm run dev
 
-# Compilar para produção (gera os arquivos para o WordPress e React)
-npm run build
+# Rodar todos os testes unitários e de integração
+npm run test:all
+
+# Compilar e gerar novo ZIP pronto para o WordPress
+npm run package
 ```
-
----
-
-## 🔌 Como usar no WordPress (Gutenberg)
-
-1. Execute `npm run build`.
-2. Copie a pasta `si-seo` para a pasta de plugins do seu WordPress:  
-   `wp-content/plugins/si-seo/`
-3. Vá no painel do WordPress em **Plugins** e clique em **Ativar**.
-4. Ao editar qualquer matéria no Saúde Insider, abra a barra lateral direita para ver o painel **SI-SEO** ativo!
